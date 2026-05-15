@@ -1,0 +1,60 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { ImagePlus, Layers3, Paintbrush, ScanLine, ShoppingBag } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { taskCards, toolPrompts } from "@/lib/mock-data";
+import { useStudioStore } from "@/lib/studio-store";
+import type { EditTool } from "@/types/image";
+
+const icons = [Paintbrush, ImagePlus, ScanLine, ShoppingBag, Layers3];
+
+export function TaskCards() {
+  const router = useRouter();
+  const setSelectedTool = useStudioStore((state) => state.setSelectedTool);
+  const setPrompt = useStudioStore((state) => state.setPrompt);
+
+  return (
+    <section className="py-14">
+      <div className="mb-7 flex items-end justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-studio-600">常用任务</p>
+          <h2 className="mt-2 text-2xl font-bold tracking-normal text-ink">从一个明确目标开始</h2>
+        </div>
+        <p className="hidden max-w-xl text-sm leading-6 text-muted md:block">
+          每个入口都对应真实产品里的独立工作流，当前会走 mock API，后续可替换为真实图像服务。
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {taskCards.map((task, index) => {
+          const Icon = icons[index] ?? Paintbrush;
+          return (
+            <Card
+              key={task.title}
+              role="button"
+              tabIndex={0}
+              className="group cursor-pointer p-5 hover:-translate-y-1 hover:border-studio-200 hover:shadow-soft"
+              onClick={() => {
+                if ("tool" in task && task.tool) {
+                  const tool = task.tool as EditTool;
+                  setSelectedTool(tool);
+                  setPrompt(toolPrompts[tool]);
+                }
+                router.push(task.route);
+              }}
+            >
+              <div
+                className={`mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${task.accent} text-white shadow-lg shadow-slate-900/10`}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="text-lg font-semibold text-ink">{task.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">{task.description}</p>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}

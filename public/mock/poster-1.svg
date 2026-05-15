@@ -1,0 +1,17 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <rect x="70" y="84" width="760" height="1032" rx="46" fill="white" fill-opacity=".55"/>
+  <rect x="118" y="136" width="664" height="170" rx="34" fill="white" fill-opacity=".72"/>
+  <text x="450" y="240" text-anchor="middle" fill="#1E3A8A" font-family="Microsoft YaHei, Arial" font-size="48" font-weight="700">清爽蓝白版式</text>
+  <rect x="170" y="390" width="560" height="360" rx="42" fill="#DBEAFE"/>
+  <rect x="220" y="812" width="460" height="28" rx="14" fill="#93C5FD"/>
+  <rect x="290" y="864" width="320" height="22" rx="11" fill="#BFDBFE"/>
+  <text x="450" y="996" text-anchor="middle" fill="#334155" font-family="Microsoft YaHei, Arial" font-size="30">适合封面 / 课程 / 打卡图</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="900" y2="1200">
+      <stop stop-color="#EAF4FF"/>
+      <stop offset=".55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C9DDFF"/>
+    </linearGradient>
+  </defs>
+</svg>

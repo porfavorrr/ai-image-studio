@@ -1,0 +1,16 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="#F8FAFC"/>
+  <rect x="78" y="84" width="744" height="1032" rx="46" fill="url(#bg)"/>
+  <rect x="144" y="152" width="612" height="340" rx="42" fill="#FFFFFF" fill-opacity=".78"/>
+  <text x="450" y="286" text-anchor="middle" fill="#312E81" font-family="Microsoft YaHei, Arial" font-size="52" font-weight="700">课程封面版式</text>
+  <text x="450" y="358" text-anchor="middle" fill="#64748B" font-family="Microsoft YaHei, Arial" font-size="28">清晰标题与模块化信息</text>
+  <rect x="168" y="600" width="564" height="270" rx="42" fill="#E0E7FF"/>
+  <rect x="236" y="940" width="428" height="26" rx="13" fill="#818CF8"/>
+  <defs>
+    <linearGradient id="bg" x1="78" y1="84" x2="822" y2="1116">
+      <stop stop-color="#EEF2FF"/>
+      <stop offset=".55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#DDD6FE"/>
+    </linearGradient>
+  </defs>
+</svg>

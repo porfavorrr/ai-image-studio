@@ -1,0 +1,25 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#EEF4FF"/>
+  <path d="M0 0H1200V540H0V0Z" fill="url(#g0)"/>
+  <rect x="178" y="170" width="844" height="560" rx="36" fill="white" fill-opacity=".78"/>
+  <rect x="242" y="245" width="716" height="396" rx="26" fill="#F8FAFC"/>
+  <rect x="310" y="330" width="230" height="252" rx="24" fill="url(#bottle)"/>
+  <rect x="350" y="275" width="150" height="80" rx="22" fill="#D7E5FF"/>
+  <rect x="638" y="330" width="250" height="168" rx="26" fill="#DBEAFE"/>
+  <rect x="670" y="360" width="188" height="18" rx="9" fill="white"/>
+  <rect x="670" y="398" width="130" height="18" rx="9" fill="white" fill-opacity=".78"/>
+  <path d="M224 674C360 612 508 602 640 644C764 683 869 672 1010 602V900H0V740C78 738 148 708 224 674Z" fill="#DDE7FB"/>
+  <text x="600" y="770" text-anchor="middle" fill="#334155" font-family="Microsoft YaHei, Arial" font-size="38" font-weight="700">原始上传图</text>
+  <text x="600" y="820" text-anchor="middle" fill="#64748B" font-family="Microsoft YaHei, Arial" font-size="24">用于演示修图、换背景与对比预览</text>
+  <defs>
+    <linearGradient id="g0" x1="0" y1="0" x2="1200" y2="540">
+      <stop stop-color="#DDEBFF"/>
+      <stop offset=".55" stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EDE9FE"/>
+    </linearGradient>
+    <linearGradient id="bottle" x1="310" y1="330" x2="540" y2="582">
+      <stop stop-color="#8FB3FF"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

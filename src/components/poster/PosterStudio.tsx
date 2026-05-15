@@ -1,0 +1,144 @@
+"use client";
+
+import { useState } from "react";
+import { CalendarDays, MessageCircle, Newspaper, PenTool, Trophy } from "lucide-react";
+import { PageShell } from "@/components/layout/PageShell";
+import { LayerPanel } from "@/components/poster/LayerPanel";
+import { PosterCanvas } from "@/components/poster/PosterCanvas";
+import { palettes, PosterSettings } from "@/components/poster/PosterSettings";
+import { PosterVariants } from "@/components/poster/PosterVariants";
+import { Card } from "@/components/ui/Card";
+import { apiClient } from "@/lib/api-client";
+import { posterMockResults } from "@/lib/mock-data";
+import { cn, sleep } from "@/lib/utils";
+import type { PosterImageResult, PosterRatio, PosterStyle, PosterUsage } from "@/types/image";
+
+const usageOptions: Array<{
+  value: PosterUsage;
+  label: string;
+  icon: typeof Newspaper;
+}> = [
+  { value: "xiaohongshu", label: "小红书封面", icon: MessageCircle },
+  { value: "wechat", label: "公众号首图", icon: Newspaper },
+  { value: "community", label: "社群活动海报", icon: CalendarDays },
+  { value: "course", label: "课程封面", icon: PenTool },
+  { value: "checkin", label: "学习打卡图", icon: Trophy }
+];
+
+export function PosterStudio() {
+  const [usage, setUsage] = useState<PosterUsage>("xiaohongshu");
+  const [title, setTitle] = useState("7 天练出自然英语口语");
+  const [subtitle, setSubtitle] = useState("每天 30 分钟 · 轻松开口说英语");
+  const [style, setStyle] = useState<PosterStyle>("clean");
+  const [ratio, setRatio] = useState<PosterRatio>("3:4");
+  const [paletteIndex, setPaletteIndex] = useState(0);
+  const [results, setResults] = useState<PosterImageResult[]>(posterMockResults);
+  const [activeResult, setActiveResult] = useState<PosterImageResult>(posterMockResults[0]);
+  const [variantIndex, setVariantIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const handleGenerate = async () => {
+    setLoading(true);
+    try {
+      const [response] = await Promise.all([
+        apiClient.createPosterImages({
+          title,
+          subtitle,
+          usage,
+          style,
+          ratio
+        }),
+        sleep(1000)
+      ]);
+      setResults(response.results);
+      setActiveResult(response.results[0]);
+      setVariantIndex(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <PageShell>
+      <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <p className="text-sm font-semibold text-studio-600">封面/海报生成器</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-normal text-ink">输入标题与用途，快速生成可编辑封面</h1>
+        </div>
+        <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-line">
+          当前版式：{activeResult.title}
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[250px_minmax(0,1fr)_360px]">
+        <Card className="p-5">
+          <div className="mb-5">
+            <p className="text-sm font-semibold text-studio-600">用途选择</p>
+            <h2 className="mt-1 text-xl font-bold text-ink">选择发布场景</h2>
+          </div>
+          <div className="grid gap-3">
+            {usageOptions.map((item) => {
+              const Icon = item.icon;
+              const active = usage === item.value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm font-semibold transition",
+                    active
+                      ? "border-studio-500 bg-studio-50 text-studio-700"
+                      : "border-line bg-white text-slate-700 hover:border-studio-200 hover:bg-studio-50/60"
+                  )}
+                  onClick={() => setUsage(item.value)}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        <PosterCanvas
+          title={title}
+          subtitle={subtitle}
+          style={style}
+          ratio={ratio}
+          palette={palettes[paletteIndex]}
+          variantIndex={variantIndex}
+        />
+
+        <div className="grid gap-6">
+          <PosterSettings
+            title={title}
+            subtitle={subtitle}
+            style={style}
+            ratio={ratio}
+            paletteIndex={paletteIndex}
+            loading={loading}
+            onTitleChange={setTitle}
+            onSubtitleChange={setSubtitle}
+            onStyleChange={setStyle}
+            onRatioChange={setRatio}
+            onPaletteChange={setPaletteIndex}
+            onGenerate={handleGenerate}
+          />
+          <LayerPanel />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <PosterVariants
+          results={results}
+          activeId={activeResult.id}
+          loading={loading}
+          onSelect={(result, index) => {
+            setActiveResult(result);
+            setVariantIndex(index);
+          }}
+        />
+      </div>
+    </PageShell>
+  );
+}

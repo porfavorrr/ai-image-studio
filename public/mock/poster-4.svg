@@ -1,0 +1,17 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="#FFF7ED"/>
+  <rect x="74" y="74" width="752" height="1052" rx="46" fill="url(#bg)"/>
+  <rect x="136" y="150" width="628" height="250" rx="38" fill="#FFFFFF" fill-opacity=".72"/>
+  <text x="450" y="292" text-anchor="middle" fill="#9A3412" font-family="Microsoft YaHei, Arial" font-size="52" font-weight="700">活动信息海报</text>
+  <rect x="150" y="520" width="600" height="96" rx="28" fill="white" fill-opacity=".75"/>
+  <rect x="150" y="654" width="600" height="96" rx="28" fill="white" fill-opacity=".58"/>
+  <rect x="150" y="788" width="600" height="96" rx="28" fill="white" fill-opacity=".75"/>
+  <text x="450" y="1010" text-anchor="middle" fill="#7C2D12" font-family="Microsoft YaHei, Arial" font-size="30">社群 / 门店 / 私域活动</text>
+  <defs>
+    <linearGradient id="bg" x1="74" y1="74" x2="826" y2="1126">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#FED7AA"/>
+      <stop offset="1" stop-color="#FCA5A5"/>
+    </linearGradient>
+  </defs>
+</svg>
