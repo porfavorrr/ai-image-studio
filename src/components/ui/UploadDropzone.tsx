@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ImagePlus, UploadCloud } from "lucide-react";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { cn } from "@/lib/utils";
 
 interface UploadDropzoneProps {
@@ -69,7 +70,7 @@ export function UploadDropzone({
       />
 
       {value ? (
-        <img src={value} alt="上传预览" className="h-full min-h-[inherit] w-full object-cover" />
+        <SmartImage src={value} alt="上传预览" className="h-full min-h-[inherit] w-full rounded-none border-0" />
       ) : (
         <div className="flex h-full min-h-[inherit] flex-col items-center justify-center px-6 text-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-lg bg-button-gradient text-white shadow-lg shadow-indigo-500/20">

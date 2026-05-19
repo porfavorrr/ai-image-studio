@@ -1,8 +1,6 @@
 # ai-image-studio
 
-一个可本地运行的 AI P 图网站 Demo，定位为“AI 图片助手”。用户可以上传图片、选择任务或输入自然语言，完成修图、换背景、去杂物、商品图生成、封面海报生成等演示流程。
-
-当前版本为内部汇报和产品 Demo：接口已按真实服务方式保留，`src/app/api/images/*` 目前返回 mock 数据，未来可在 `src/lib/services/image-service.ts` 替换为真实图像生成模型调用。
+一个可本地运行并可部署到服务器的 AI 图片编辑 Demo，包含修图工作台、商品图工作室、封面/海报生成器和模板中心。当前版本保留 mock 展示，同时支持两种真实图片后端：OpenAI Images API 和服务器本机 `codex_image_api.py`。
 
 ## 技术栈
 
@@ -11,17 +9,7 @@
 - Tailwind CSS
 - lucide-react
 - Zustand
-- Next.js Route Handlers mock API
-
-## 功能列表
-
-- 首页：Hero、上传入口、任务入口、热门模板、前后对比展示
-- 修图工作台：原图预览、prompt 编辑、快捷工具、3 张候选结果、before/after、编辑历史
-- 商品图工作室：商品上传、模板选择、参数配置、4 张商品图结果、编辑跳转
-- 封面/海报生成器：用途选择、实时画布、文字样式设置、图层管理、候选版式
-- 模板中心：分类筛选、模板卡片、按模板跳转到对应工作台
-- API 能力说明页：能力卡片、调用流程、mock 请求示例
-- Mock API：编辑、商品图、海报、模板列表、健康检查
+- OpenAI Images API 或 Codex 图片 API
 
 ## 本地启动
 
@@ -36,11 +24,83 @@ npm run dev
 http://localhost:3000
 ```
 
-构建检查：
+## 真实图像 API 配置
+
+复制 `.env.example` 为 `.env.local`，并按需填写：
 
 ```bash
-npm run lint
-npm run build
+OPENAI_API_KEY=
+IMAGE_MODEL=gpt-image-1
+IMAGE_API_MODE=mock
+IMAGE_PROVIDER=codex
+CODEX_IMAGE_API_BASE_URL=http://127.0.0.1:8000
+CODEX_IMAGE_API_TIMEOUT_SECONDS=900
+```
+
+- `IMAGE_API_MODE=mock`：使用内置 mock 图片结果，不调用真实服务。
+- `IMAGE_API_MODE=real`：服务端调用真实图片后端。
+- `IMAGE_PROVIDER=codex`：调用服务器本机的 `codex_image_api.py`。
+- `IMAGE_PROVIDER=openai`：调用 OpenAI Images API。
+- `CODEX_IMAGE_API_BASE_URL`：Next.js 服务端访问 Codex 图片 API 的地址，推荐只用内网或本机地址。
+- `CODEX_IMAGE_API_TIMEOUT_SECONDS`：等待 Codex 图片 API 返回的最长时间。
+- `OPENAI_API_KEY`：只在 OpenAI provider 下需要，只在服务端读取，不会暴露到前端。
+- `IMAGE_MODEL`：OpenAI provider 的模型名，默认 `gpt-image-1`。
+
+如果 `IMAGE_API_MODE=real`、`IMAGE_PROVIDER=openai` 但没有配置 `OPENAI_API_KEY`，接口会自动回退到 mock 结果，页面不会崩溃。使用 `IMAGE_PROVIDER=codex` 时不需要 OpenAI Key。
+
+服务器部署请看：
+
+```text
+docs/deploy-codex-server.md
+```
+
+## 当前已实现能力
+
+- `/api/images/edit`：接收 `multipart/form-data`，支持上传图片、prompt、工具类型、尺寸、质量和输出格式。
+- `/api/images/product`：接收 `multipart/form-data`，基于商品图生成商业商品图；真实模式默认生成 1 张，mock 模式保留 4 张候选。
+- `/api/images/poster`：接收 JSON，生成适合前端文字层叠加的海报背景图；真实模式默认生成 1 张，mock 模式保留候选版式。
+- 服务端 prompt 模板：换背景、去杂物、增强清晰度、改风格、扩图、商品图、海报背景。
+- Codex provider：编辑/商品图转发到 `/v1/images/reference`，海报背景转发到 `/v1/images/text`。
+- 上传校验：支持 JPEG、PNG、WebP，单图最大 10MB。
+- 前端状态：loading、success、error 展示，结果图支持下载和继续编辑。
+- mock/real 响应结构尽量一致，便于后续替换为异步任务或对象存储。
+
+## API 响应
+
+成功响应示例：
+
+```json
+{
+  "taskId": "image-task-xxx",
+  "status": "succeeded",
+  "mode": "real",
+  "results": [
+    {
+      "id": "result-1",
+      "url": "data:image/png;base64,...",
+      "type": "edited",
+      "label": "效果图 1"
+    }
+  ],
+  "historyItem": {
+    "id": "history-xxx",
+    "title": "换背景",
+    "createdAt": "2026-05-18T00:00:00.000Z",
+    "thumbnail": "data:image/png;base64,..."
+  }
+}
+```
+
+失败响应示例：
+
+```json
+{
+  "status": "failed",
+  "error": {
+    "code": "IMAGE_TOO_LARGE",
+    "message": "图片大小不能超过 10MB"
+  }
+}
 ```
 
 ## 目录结构
@@ -48,106 +108,37 @@ npm run build
 ```text
 src/
   app/
-    page.tsx
-    editor/page.tsx
-    product/page.tsx
-    poster/page.tsx
-    templates/page.tsx
-    api-platform/page.tsx
-    api/
-      health/route.ts
-      templates/route.ts
-      images/
-        edit/route.ts
-        product/route.ts
-        poster/route.ts
+    api/images/edit/route.ts
+    api/images/product/route.ts
+    api/images/poster/route.ts
   components/
-    layout/
-    ui/
-    home/
     editor/
     product/
     poster/
-    templates/
+    ui/
   lib/
     api-client.ts
     mock-data.ts
-    studio-store.ts
-    services/
+    mock-images.ts
+    server/
+      image-prompt-builder.ts
+      image-route-utils.ts
+      image-storage.ts
+      image-validation.ts
+      codex-image-api-service.ts
+      openai-image-service.ts
   types/
-public/
-  mock/
+    image.ts
+server/
+  codex_image_api.py
+docs/
+  deploy-codex-server.md
 ```
 
-## Mock API
+## 后续扩展位置
 
-### `POST /api/images/edit`
-
-用于修图、换背景、去杂物、增强、改风格、扩图。
-
-```json
-{
-  "imageUrl": "string",
-  "prompt": "string",
-  "tool": "background"
-}
-```
-
-返回任务 id、3 张候选结果和一条历史记录。
-
-### `POST /api/images/product`
-
-用于生成商品图。
-
-```json
-{
-  "imageUrl": "string",
-  "template": "white-bg",
-  "scene": "desk",
-  "style": "premium",
-  "sellingPoints": "轻盈质感",
-  "ratio": "1:1"
-}
-```
-
-返回任务 id 和 4 张商品图结果。
-
-### `POST /api/images/poster`
-
-用于生成封面/海报候选版式。
-
-```json
-{
-  "title": "7 天练出自然英语口语",
-  "subtitle": "每天 30 分钟 · 轻松开口说英语",
-  "usage": "xiaohongshu",
-  "style": "clean",
-  "ratio": "3:4"
-}
-```
-
-返回任务 id 和 6 个 mock 版式。
-
-### `GET /api/templates`
-
-返回模板库列表。
-
-### `GET /api/health`
-
-返回服务健康状态。
-
-## 后续接入真实图像模型
-
-当前 API 调用链路为：
-
-```text
-前端组件 -> src/lib/api-client.ts -> src/app/api/images/* -> src/lib/services/image-service.ts -> mock 数据
-```
-
-后续接入真实图像服务时，优先替换：
-
-- `src/lib/services/image-service.ts`
-- `src/lib/mock-data.ts` 中的结果图片来源
-- 如需任务轮询，可新增 `src/app/api/images/tasks/[taskId]/route.ts`
-
-前端页面和类型定义已经围绕任务 id、状态、结果数组、历史记录设计，适合平滑升级为真实异步生成流程。
+- mask 局部编辑：在 `/api/images/edit` 增加 `mask` 字段，并在前端补涂抹层。
+- 对象存储：替换 `src/lib/server/image-storage.ts` 的 `saveBase64Image`，将结果保存到 `public/generated`、S3 或 OSS。
+- 用户系统：在 API Route 中接入 session，给历史记录绑定用户。
+- 积分系统：在真实模式调用前扣减额度，失败时回滚。
+- 异步任务：新增任务表和 `/api/images/tasks/[taskId]`，支持轮询与排队。

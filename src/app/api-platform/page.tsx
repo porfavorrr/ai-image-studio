@@ -1,8 +1,9 @@
-import { ArrowRight, Braces, Cloud, Database, Image, Layers, Route, ServerCog, Sparkles } from "lucide-react";
+import { ArrowRight, Braces, Cloud, Database, Image as ImageIcon, Layers, Route, ServerCog, Sparkles } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { apiCapabilities } from "@/lib/mock-data";
+import { mockImages } from "@/lib/mock-images";
 
 const flow = [
   { label: "业务系统", icon: Route },
@@ -29,7 +30,7 @@ export default function ApiPlatformPage() {
         {apiCapabilities.map((capability) => (
           <Card key={capability} className="p-5 hover:-translate-y-1 hover:border-studio-200 hover:shadow-soft">
             <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-lg bg-button-gradient text-white">
-              <Image className="h-5 w-5" />
+              <ImageIcon className="h-5 w-5" />
             </div>
             <h2 className="text-lg font-bold text-ink">{capability}</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
@@ -77,7 +78,7 @@ export default function ApiPlatformPage() {
 Content-Type: application/json
 
 {
-  "imageUrl": "/mock/original.svg",
+  "imageUrl": "${mockImages.original}",
   "prompt": "把背景换成干净的白色摄影棚，主体保持不变",
   "tool": "background"
 }
@@ -89,7 +90,7 @@ Response
   "results": [
     {
       "id": "result-1",
-      "url": "/mock/edit-1.svg",
+      "url": "${mockImages.edit1}",
       "type": "edited",
       "label": "效果图 1"
     }

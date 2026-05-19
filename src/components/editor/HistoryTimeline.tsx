@@ -2,6 +2,7 @@
 
 import { Clock3 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
 import type { HistoryItem } from "@/types/image";
 
 interface HistoryTimelineProps {
@@ -25,7 +26,7 @@ export function HistoryTimeline({ items }: HistoryTimelineProps) {
         {items.map((item, index) => (
           <div key={item.id} className="min-w-[190px] rounded-lg border border-line bg-slate-50 p-3">
             <div className="relative h-24 overflow-hidden rounded-lg bg-white">
-              <img src={item.thumbnail} alt={item.title} className="h-full w-full object-cover" />
+              <SmartImage src={item.thumbnail} alt={item.title} className="h-full w-full rounded-none border-0" />
               <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[11px] font-semibold text-slate-600">
                 {String(index + 1).padStart(2, "0")}
               </span>

@@ -8,8 +8,9 @@ import { ProductResultGrid } from "@/components/product/ProductResultGrid";
 import { ProductTemplateSelector } from "@/components/product/ProductTemplateSelector";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, getImageErrorMessage } from "@/lib/api-client";
 import { industryTemplates, mockImages, productMockResults } from "@/lib/mock-data";
 import { sleep } from "@/lib/utils";
 import { useStudioStore } from "@/lib/studio-store";
@@ -42,6 +43,7 @@ export function ProductStudio() {
   const router = useRouter();
   const setUploadedImage = useStudioStore((state) => state.setUploadedImage);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [template, setTemplate] = useState<ProductTemplate>("white-bg");
   const [scene, setScene] = useState<ProductScene>("desk");
   const [style, setStyle] = useState<ProductStyle>("premium");
@@ -49,12 +51,15 @@ export function ProductStudio() {
   const [ratio, setRatio] = useState<ProductRatio>("1:1");
   const [results, setResults] = useState<ProductImageResult[]>(productMockResults);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleGenerate = async () => {
     setLoading(true);
+    setError("");
     try {
       const [response] = await Promise.all([
         apiClient.createProductImages({
+          image: imageFile ?? undefined,
           imageUrl: imageUrl ?? mockImages.product1,
           template,
           scene,
@@ -64,7 +69,14 @@ export function ProductStudio() {
         }),
         sleep(1000)
       ]);
+
+      if (!response.results[0]) {
+        throw new Error("模型返回结果为空，请稍后重试");
+      }
+
       setResults(response.results);
+    } catch (requestError) {
+      setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -87,6 +99,12 @@ export function ProductStudio() {
         </div>
       </div>
 
+      {error ? (
+        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}
+        </div>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-3">
@@ -104,7 +122,10 @@ export function ProductStudio() {
             title="上传商品图"
             subtitle="建议使用主体清晰、背景简洁的产品照片"
             className="min-h-[420px]"
-            onImageSelected={(url) => setImageUrl(url)}
+            onImageSelected={(url, file) => {
+              setImageUrl(url);
+              setImageFile(file);
+            }}
           />
         </Card>
 
@@ -116,7 +137,7 @@ export function ProductStudio() {
           <ProductTemplateSelector value={template} onChange={setTemplate} />
 
           <div className="mt-6 overflow-hidden rounded-lg border border-line bg-slate-50">
-            <img src={mockImages.product2} alt="商品场景预览" className="h-[250px] w-full object-cover" />
+            <SmartImage src={mockImages.product2} alt="商品场景预览" className="h-[250px] w-full rounded-none border-0" />
           </div>
         </Card>
 

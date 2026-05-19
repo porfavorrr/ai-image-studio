@@ -85,7 +85,7 @@ export function PromptPanel({
       </Button>
 
       <p className="mt-4 text-xs leading-5 text-muted">
-        当前版本会调用 mock API 并返回任务 id、结果图片与历史记录，接口结构已按真实服务预留。
+        真实模式会在服务端调用图像模型；未配置 API Key 时返回 mock 结果。
       </p>
     </Card>
   );

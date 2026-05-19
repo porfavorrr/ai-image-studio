@@ -6,14 +6,16 @@ import { mockImages } from "@/lib/mock-data";
 
 interface StudioState {
   uploadedImage: string | null;
+  uploadedImageFile: File | null;
   currentImage: string | null;
+  currentImageFile: File | null;
   prompt: string;
   selectedTool: EditTool;
   editResults: EditImageResult[];
   selectedResult: EditImageResult | null;
   history: HistoryItem[];
-  setUploadedImage: (imageUrl: string) => void;
-  setCurrentImage: (imageUrl: string) => void;
+  setUploadedImage: (imageUrl: string, file?: File | null) => void;
+  setCurrentImage: (imageUrl: string, file?: File | null) => void;
   setPrompt: (prompt: string) => void;
   setSelectedTool: (tool: EditTool) => void;
   setEditResults: (results: EditImageResult[]) => void;
@@ -23,7 +25,9 @@ interface StudioState {
 
 export const useStudioStore = create<StudioState>((set) => ({
   uploadedImage: null,
+  uploadedImageFile: null,
   currentImage: null,
+  currentImageFile: null,
   prompt: "",
   selectedTool: "custom",
   editResults: [],
@@ -36,10 +40,12 @@ export const useStudioStore = create<StudioState>((set) => ({
       thumbnail: mockImages.original
     }
   ],
-  setUploadedImage: (imageUrl) =>
+  setUploadedImage: (imageUrl, file = null) =>
     set(() => ({
       uploadedImage: imageUrl,
+      uploadedImageFile: file,
       currentImage: imageUrl,
+      currentImageFile: file,
       selectedResult: null,
       editResults: [],
       history: [
@@ -51,10 +57,10 @@ export const useStudioStore = create<StudioState>((set) => ({
         }
       ]
     })),
-  setCurrentImage: (imageUrl) => set({ currentImage: imageUrl }),
+  setCurrentImage: (imageUrl, file = null) => set({ currentImage: imageUrl, currentImageFile: file }),
   setPrompt: (prompt) => set({ prompt }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
   setEditResults: (results) => set({ editResults: results }),
-  setSelectedResult: (result) => set({ selectedResult: result, currentImage: result.url }),
+  setSelectedResult: (result) => set({ selectedResult: result, currentImage: result.url, currentImageFile: null }),
   addHistoryItem: (item) => set((state) => ({ history: [...state.history, item] }))
 }));

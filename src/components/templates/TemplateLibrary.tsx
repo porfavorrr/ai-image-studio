@@ -6,6 +6,7 @@ import { ArrowRight, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { apiClient } from "@/lib/api-client";
 import { templates as fallbackTemplates } from "@/lib/mock-data";
 import { cn, formatUsageCount } from "@/lib/utils";
@@ -71,7 +72,7 @@ export function TemplateLibrary() {
               className="group overflow-hidden hover:-translate-y-1 hover:border-studio-200 hover:shadow-soft"
             >
               <div className="relative">
-                <img src={template.thumbnail} alt={template.name} className="h-56 w-full object-cover" />
+                <SmartImage src={template.thumbnail} alt={template.name} className="h-56 w-full rounded-none border-0" />
                 <Badge className="absolute left-3 top-3 bg-white/88 text-studio-700 ring-white/80">
                   {template.category}
                 </Badge>

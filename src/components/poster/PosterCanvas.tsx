@@ -1,6 +1,8 @@
 "use client";
 
 import { Badge } from "@/components/ui/Badge";
+import { SmartImage } from "@/components/ui/SmartImage";
+import { mockImages } from "@/lib/mock-images";
 import { cn } from "@/lib/utils";
 import type { PosterRatio, PosterStyle } from "@/types/image";
 
@@ -27,9 +29,10 @@ interface PosterCanvasProps {
   ratio: PosterRatio;
   palette: string[];
   variantIndex: number;
+  backgroundImage?: string;
 }
 
-export function PosterCanvas({ title, subtitle, style, ratio, palette, variantIndex }: PosterCanvasProps) {
+export function PosterCanvas({ title, subtitle, style, ratio, palette, variantIndex, backgroundImage }: PosterCanvasProps) {
   const alignLeft = variantIndex % 3 === 1;
   const compact = ratio === "16:9";
 
@@ -46,9 +49,36 @@ export function PosterCanvas({ title, subtitle, style, ratio, palette, variantIn
           background: `linear-gradient(145deg, ${palette[0]} 0%, ${palette[1]} 56%, ${palette[2]} 100%)`
         }}
       >
+        {backgroundImage ? (
+          <>
+            <SmartImage
+              src={backgroundImage}
+              alt="海报背景"
+              className="absolute inset-0 h-full w-full rounded-none border-0"
+              imageClassName="object-cover"
+              rounded={false}
+            />
+            <div className="absolute inset-0 bg-white/38" />
+          </>
+        ) : null}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.38)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.28)_1px,transparent_1px)] bg-[length:34px_34px]" />
         <div className="absolute left-0 top-0 h-full w-3 bg-white/45" />
         <div className="absolute bottom-0 right-0 h-28 w-2/3 bg-white/22" />
+        {!backgroundImage ? (
+          <div
+            className={cn(
+              "absolute overflow-hidden rounded-2xl border border-white/70 bg-white/40 p-2 shadow-xl backdrop-blur",
+              compact ? "right-8 top-1/2 hidden h-40 w-52 -translate-y-1/2 md:block" : "bottom-28 right-8 h-44 w-40"
+            )}
+          >
+            <SmartImage
+              src={mockImages.posterStudy}
+              alt="学习场景海报素材"
+              className="h-full w-full border-0"
+              imageClassName="object-cover"
+            />
+          </div>
+        ) : null}
         <div className="absolute right-7 top-7 rounded-lg border border-white/55 bg-white/38 px-3 py-2 text-xs font-semibold text-slate-700 backdrop-blur">
           {styleCopy[style]}
         </div>
@@ -80,10 +110,12 @@ export function PosterCanvas({ title, subtitle, style, ratio, palette, variantIn
 
           {!compact ? (
             <div className={cn("mt-8 w-full rounded-lg border border-white/60 bg-white/46 p-4 backdrop-blur", alignLeft ? "max-w-[88%]" : "max-w-[78%]")}>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="h-16 rounded-lg bg-white/80" />
-                <div className="h-16 rounded-lg bg-white/58" />
-                <div className="h-16 rounded-lg bg-white/80" />
+              <div className="grid grid-cols-3 gap-3 pr-32">
+                {["每日计划", "跟读练习", "场景表达"].map((item) => (
+                  <div key={item} className="rounded-lg bg-white/80 px-3 py-4 text-xs font-semibold text-slate-600">
+                    {item}
+                  </div>
+                ))}
               </div>
               <div className="mt-4 h-2 rounded-full bg-white/76" />
               <div className="mt-2 h-2 w-2/3 rounded-full bg-white/58" />

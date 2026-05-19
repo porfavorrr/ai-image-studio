@@ -7,31 +7,17 @@ import type {
   ProductStyle,
   ProductTemplate
 } from "@/types/image";
+import { mockImages } from "@/lib/mock-images";
 import type { TemplateItem } from "@/types/template";
 
-export const mockImages = {
-  original: "/mock/original.svg",
-  edit1: "/mock/edit-1.svg",
-  edit2: "/mock/edit-2.svg",
-  edit3: "/mock/edit-3.svg",
-  product1: "/mock/product-1.svg",
-  product2: "/mock/product-2.svg",
-  product3: "/mock/product-3.svg",
-  product4: "/mock/product-4.svg",
-  poster1: "/mock/poster-1.svg",
-  poster2: "/mock/poster-2.svg",
-  poster3: "/mock/poster-3.svg",
-  poster4: "/mock/poster-4.svg",
-  poster5: "/mock/poster-5.svg",
-  poster6: "/mock/poster-6.svg"
-};
+export { mockImages };
 
 export const toolPrompts: Record<EditTool, string> = {
-  background: "把背景换成干净的白色摄影棚，主体保持不变",
+  background: "把背景换成干净明亮的商业摄影背景，主体保持不变",
   remove: "去除画面中的多余杂物，背景自然补全",
-  enhance: "提升图片清晰度和细节，光影更加自然",
-  style: "改成高级杂志封面风格，画面更有质感",
-  expand: "将画面向四周自然扩展，适合做封面",
+  enhance: "提升图片清晰度、细节和光影表现，画面更干净自然",
+  style: "改成更高级、更专业的商业视觉风格，保持主体内容不变",
+  expand: "将画面边缘自然扩展，适合封面、海报或横竖版裁切",
   custom: ""
 };
 
@@ -116,7 +102,7 @@ export const taskCards = [
     accent: "from-amber-400 to-rose-500"
   },
   {
-    title: "做封面/海报",
+    title: "做封面海报",
     description: "快速生成封面、活动海报和课程视觉。",
     route: "/poster",
     accent: "from-emerald-400 to-teal-500"
@@ -147,7 +133,7 @@ export const templates: TemplateItem[] = [
     name: "职业头像",
     category: "头像",
     description: "自然修饰五官与光线，保留真实质感。",
-    thumbnail: mockImages.edit2,
+    thumbnail: mockImages.portraitBusiness,
     usageCount: 17320,
     route: "/editor"
   },
@@ -156,7 +142,7 @@ export const templates: TemplateItem[] = [
     name: "学习打卡图",
     category: "封面海报",
     description: "适合社群打卡和每日内容分享。",
-    thumbnail: mockImages.poster3,
+    thumbnail: mockImages.posterStudy,
     usageCount: 12680,
     route: "/poster"
   },

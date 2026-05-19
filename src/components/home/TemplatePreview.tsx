@@ -3,6 +3,7 @@ import { ArrowRight, Check, SplitSquareHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { editMockResults, mockImages, templates } from "@/lib/mock-data";
 import { formatUsageCount } from "@/lib/utils";
 
@@ -32,7 +33,7 @@ export function TemplatePreview() {
               href={template.route}
               className="group overflow-hidden rounded-lg border border-line bg-slate-50 transition hover:-translate-y-1 hover:border-studio-200 hover:bg-white hover:shadow-card"
             >
-              <img src={template.thumbnail} alt={template.name} className="h-36 w-full object-cover" />
+              <SmartImage src={template.thumbnail} alt={template.name} className="h-36 w-full rounded-none border-0" />
               <div className="p-4">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold text-ink">{template.name}</h3>
@@ -62,13 +63,13 @@ export function TemplatePreview() {
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-slate-100">
           <div className="grid grid-cols-2">
             <div className="relative">
-              <img src={mockImages.original} alt="原图" className="h-72 w-full object-cover" />
+              <SmartImage src={mockImages.original} alt="原图" className="h-72 w-full rounded-none border-0" />
               <span className="absolute left-3 top-3 rounded-full bg-white/88 px-3 py-1 text-xs font-semibold text-slate-700">
                 Before
               </span>
             </div>
             <div className="relative border-l border-white">
-              <img src={editMockResults[0].url} alt="效果图" className="h-72 w-full object-cover" />
+              <SmartImage src={editMockResults[0].url} alt="效果图" className="h-72 w-full rounded-none border-0" />
               <span className="absolute left-3 top-3 rounded-full bg-studio-600 px-3 py-1 text-xs font-semibold text-white">
                 After
               </span>

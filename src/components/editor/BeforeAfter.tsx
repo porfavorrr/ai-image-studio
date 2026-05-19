@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
 
 interface BeforeAfterProps {
   before: string;
@@ -18,8 +19,18 @@ export function BeforeAfter({ before, after }: BeforeAfterProps) {
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">左右分屏</span>
       </div>
       <div className="relative h-[280px] overflow-hidden rounded-lg border border-line bg-slate-100">
-        <img src={before} alt="Before" className="absolute inset-0 h-full w-1/2 object-cover object-left" />
-        <img src={after} alt="After" className="absolute inset-y-0 right-0 h-full w-1/2 object-cover object-right" />
+        <SmartImage
+          src={before}
+          alt="Before"
+          className="absolute inset-0 h-full w-1/2 rounded-none border-0"
+          imageClassName="object-left"
+        />
+        <SmartImage
+          src={after}
+          alt="After"
+          className="absolute inset-y-0 right-0 h-full w-1/2 rounded-none border-0"
+          imageClassName="object-right"
+        />
         <div className="absolute inset-y-0 left-1/2 w-px bg-white shadow-[0_0_0_1px_rgba(15,23,42,0.08)]" />
         <span className="absolute left-4 top-4 rounded-full bg-white/88 px-3 py-1 text-xs font-semibold text-slate-700">
           原图

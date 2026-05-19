@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
 import { mockImages } from "@/lib/mock-data";
 import { useStudioStore } from "@/lib/studio-store";
@@ -14,9 +15,12 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden rounded-lg border border-white/70 bg-slate-950 px-5 py-14 shadow-soft lg:px-12 lg:py-20">
-      <div className="absolute inset-0 opacity-80">
-        <img src={mockImages.poster6} alt="" className="h-full w-full object-cover" />
-      </div>
+      <SmartImage
+        src={mockImages.heroBackground}
+        alt="现代图片工作台背景"
+        className="absolute inset-0 border-0 opacity-80"
+        rounded={false}
+      />
       <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(8,13,34,0.92)_0%,rgba(20,33,80,0.74)_44%,rgba(255,255,255,0.12)_100%)]" />
       <div className="absolute inset-x-8 bottom-8 hidden h-28 rounded-lg bg-white/10 blur-3xl lg:block" />
 
@@ -38,8 +42,8 @@ export function HeroSection() {
             title="把图片拖到这里，立即开始修图"
             subtitle="当前 Demo 会保留上传预览，并进入完整编辑工作台"
             className="min-h-[260px] border-white/25 bg-white/90 text-ink"
-            onImageSelected={(imageUrl) => {
-              setUploadedImage(imageUrl);
+            onImageSelected={(imageUrl, file) => {
+              setUploadedImage(imageUrl, file);
               router.push("/editor");
             }}
           />
@@ -75,10 +79,10 @@ export function HeroSection() {
             key={image}
             className="overflow-hidden rounded-lg border border-white/14 bg-white/10 p-2 shadow-2xl backdrop-blur"
           >
-            <img
+            <SmartImage
               src={image}
               alt={`生成效果 ${index + 1}`}
-              className="h-44 w-full rounded-lg object-cover"
+              className="h-44 w-full border-0"
             />
           </div>
         ))}

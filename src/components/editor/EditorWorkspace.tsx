@@ -9,7 +9,7 @@ import { ResultGallery } from "@/components/editor/ResultGallery";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card } from "@/components/ui/Card";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, getImageErrorMessage } from "@/lib/api-client";
 import { editMockResults, mockImages, toolPrompts } from "@/lib/mock-data";
 import { sleep } from "@/lib/utils";
 import { useStudioStore } from "@/lib/studio-store";
@@ -19,9 +19,12 @@ const steps = ["上传图片", "描述需求", "生成结果", "继续修改"];
 
 export function EditorWorkspace() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const {
     uploadedImage,
+    uploadedImageFile,
     currentImage,
+    currentImageFile,
     prompt,
     selectedTool,
     editResults,
@@ -51,15 +54,24 @@ export function EditorWorkspace() {
     const finalTool: EditTool = selectedTool || "custom";
 
     setLoading(true);
+    setError("");
     try {
       const [response] = await Promise.all([
         apiClient.editImage({
+          image: currentImageFile ?? uploadedImageFile ?? undefined,
           imageUrl: currentImage ?? originalImage,
           prompt: finalPrompt,
-          tool: finalTool
+          tool: finalTool,
+          size: "1024x1024",
+          quality: "auto",
+          outputFormat: "png"
         }),
         sleep(1000)
       ]);
+
+      if (!response.results[0]) {
+        throw new Error("模型返回结果为空，请稍后重试");
+      }
 
       setEditResults(response.results);
       setSelectedResult(response.results[0]);
@@ -67,6 +79,8 @@ export function EditorWorkspace() {
         ...response.historyItem,
         thumbnail: response.results[0].url
       });
+    } catch (requestError) {
+      setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -94,6 +108,12 @@ export function EditorWorkspace() {
         </div>
       </div>
 
+      {error ? (
+        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}
+        </div>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)_340px]">
         <Card className="p-5">
           <div className="mb-4">
@@ -106,7 +126,7 @@ export function EditorWorkspace() {
             title="上传原图"
             subtitle="拖拽或点击替换当前图片"
             className="min-h-[360px]"
-            onImageSelected={(imageUrl) => setUploadedImage(imageUrl)}
+            onImageSelected={(imageUrl, file) => setUploadedImage(imageUrl, file)}
           />
         </Card>
 

@@ -8,7 +8,7 @@ import { PosterCanvas } from "@/components/poster/PosterCanvas";
 import { palettes, PosterSettings } from "@/components/poster/PosterSettings";
 import { PosterVariants } from "@/components/poster/PosterVariants";
 import { Card } from "@/components/ui/Card";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, getImageErrorMessage } from "@/lib/api-client";
 import { posterMockResults } from "@/lib/mock-data";
 import { cn, sleep } from "@/lib/utils";
 import type { PosterImageResult, PosterRatio, PosterStyle, PosterUsage } from "@/types/image";
@@ -36,9 +36,11 @@ export function PosterStudio() {
   const [activeResult, setActiveResult] = useState<PosterImageResult>(posterMockResults[0]);
   const [variantIndex, setVariantIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleGenerate = async () => {
     setLoading(true);
+    setError("");
     try {
       const [response] = await Promise.all([
         apiClient.createPosterImages({
@@ -50,9 +52,16 @@ export function PosterStudio() {
         }),
         sleep(1000)
       ]);
+
+      if (!response.results[0]) {
+        throw new Error("模型返回结果为空，请稍后重试");
+      }
+
       setResults(response.results);
       setActiveResult(response.results[0]);
       setVariantIndex(0);
+    } catch (requestError) {
+      setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -69,6 +78,12 @@ export function PosterStudio() {
           当前版式：{activeResult.title}
         </div>
       </div>
+
+      {error ? (
+        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[250px_minmax(0,1fr)_360px]">
         <Card className="p-5">
@@ -107,6 +122,7 @@ export function PosterStudio() {
           ratio={ratio}
           palette={palettes[paletteIndex]}
           variantIndex={variantIndex}
+          backgroundImage={activeResult.url}
         />
 
         <div className="grid gap-6">

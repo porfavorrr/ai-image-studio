@@ -1,6 +1,9 @@
+"use client";
+
 import type {
   EditImageRequest,
   EditImageResponse,
+  ImageApiErrorBody,
   PosterImageRequest,
   PosterImageResponse,
   ProductImageRequest,
@@ -8,7 +11,79 @@ import type {
 } from "@/types/image";
 import type { TemplateItem } from "@/types/template";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export class ImageApiClientError extends Error {
+  code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "ImageApiClientError";
+    this.code = code;
+  }
+}
+
+function fileExtensionFromMime(type: string) {
+  if (type === "image/jpeg") return "jpg";
+  if (type === "image/webp") return "webp";
+  return "png";
+}
+
+function dataUrlToFile(dataUrl: string, filename: string) {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header.match(/data:(.*?);base64/)?.[1] || "image/png";
+  const bytes = window.atob(base64);
+  const chunks = new Uint8Array(bytes.length);
+
+  for (let index = 0; index < bytes.length; index += 1) {
+    chunks[index] = bytes.charCodeAt(index);
+  }
+
+  return new File([chunks], filename, { type: mime });
+}
+
+async function imageUrlToFile(imageUrl: string, filename: string) {
+  if (imageUrl.startsWith("data:")) {
+    return dataUrlToFile(imageUrl, filename);
+  }
+
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new ImageApiClientError("IMAGE_READ_FAILED", "无法读取当前图片，请重新上传后再试");
+  }
+
+  const blob = await response.blob();
+  return new File([blob], `${filename}.${fileExtensionFromMime(blob.type)}`, {
+    type: blob.type || "image/png"
+  });
+}
+
+async function resolveImageFile(image?: File, imageUrl?: string, filename = "input-image") {
+  if (image) return image;
+  if (!imageUrl) return undefined;
+
+  try {
+    return await imageUrlToFile(imageUrl, filename);
+  } catch (error) {
+    if (error instanceof ImageApiClientError) throw error;
+    throw new ImageApiClientError("IMAGE_READ_FAILED", "无法读取当前图片，请重新上传后再试");
+  }
+}
+
+async function parseResponse<T>(response: Response): Promise<T> {
+  const payload = (await response.json().catch(() => null)) as T | ImageApiErrorBody | null;
+
+  if (!response.ok) {
+    const errorBody = payload as ImageApiErrorBody | null;
+    throw new ImageApiClientError(
+      errorBody?.error?.code || "REQUEST_FAILED",
+      errorBody?.error?.message || `请求失败：${response.status}`
+    );
+  }
+
+  return payload as T;
+}
+
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     ...init,
     headers: {
@@ -17,33 +92,92 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
   });
 
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+  return parseResponse<T>(response);
+}
+
+async function postForm<T>(path: string, formData: FormData): Promise<T> {
+  const response = await fetch(path, {
+    method: "POST",
+    body: formData
+  });
+
+  return parseResponse<T>(response);
+}
+
+export function getImageErrorMessage(error: unknown) {
+  if (error instanceof ImageApiClientError) {
+    return error.message;
   }
 
-  return response.json() as Promise<T>;
+  if (error instanceof Error) {
+    return error.message || "网络请求失败，请稍后重试";
+  }
+
+  return "网络请求失败，请稍后重试";
+}
+
+export async function downloadImage(url: string, filename = `ai-image-result-${Date.now()}.png`) {
+  const anchor = document.createElement("a");
+  anchor.download = filename;
+
+  if (url.startsWith("data:")) {
+    anchor.href = url;
+    anchor.click();
+    return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    anchor.href = objectUrl;
+    anchor.click();
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.rel = "noreferrer";
+    anchor.click();
+  }
 }
 
 export const apiClient = {
-  editImage(payload: EditImageRequest) {
-    return request<EditImageResponse>("/api/images/edit", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+  async editImage(payload: EditImageRequest) {
+    const image = await resolveImageFile(payload.image, payload.imageUrl, "edit-input");
+    const formData = new FormData();
+
+    if (image) formData.append("image", image);
+    formData.append("prompt", payload.prompt ?? "");
+    formData.append("tool", payload.tool);
+    formData.append("size", payload.size ?? "1024x1024");
+    formData.append("quality", payload.quality ?? "auto");
+    formData.append("outputFormat", payload.outputFormat ?? "png");
+
+    return postForm<EditImageResponse>("/api/images/edit", formData);
   },
-  createProductImages(payload: ProductImageRequest) {
-    return request<ProductImageResponse>("/api/images/product", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+
+  async createProductImages(payload: ProductImageRequest) {
+    const image = await resolveImageFile(payload.image, payload.imageUrl, "product-input");
+    const formData = new FormData();
+
+    if (image) formData.append("image", image);
+    formData.append("template", payload.template);
+    formData.append("scene", payload.scene);
+    formData.append("style", payload.style);
+    formData.append("sellingPoints", payload.sellingPoints);
+    formData.append("ratio", payload.ratio);
+
+    return postForm<ProductImageResponse>("/api/images/product", formData);
   },
+
   createPosterImages(payload: PosterImageRequest) {
-    return request<PosterImageResponse>("/api/images/poster", {
+    return requestJson<PosterImageResponse>("/api/images/poster", {
       method: "POST",
       body: JSON.stringify(payload)
     });
   },
+
   listTemplates() {
-    return request<TemplateItem[]>("/api/templates");
+    return requestJson<TemplateItem[]>("/api/templates");
   }
 };
