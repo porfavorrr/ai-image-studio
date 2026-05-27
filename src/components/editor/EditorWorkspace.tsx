@@ -83,6 +83,7 @@ export function EditorWorkspace() {
 
       setEditResults(response.results);
       setSelectedResult(response.results[0]);
+      window.dispatchEvent(new CustomEvent("ai-image-credits-updated"));
       addHistoryItem({
         ...response.historyItem,
         thumbnail: response.results[0].url
@@ -126,6 +127,10 @@ export function EditorWorkspace() {
           {error.includes("登录") ? (
             <Link href="/login?redirect=/editor" className="text-studio-700 underline">
               去登录
+            </Link>
+          ) : error.includes("积分不足") ? (
+            <Link href="/pricing" className="text-studio-700 underline">
+              购买积分
             </Link>
           ) : null}
         </div>

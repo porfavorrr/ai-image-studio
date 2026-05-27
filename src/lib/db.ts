@@ -1,6 +1,7 @@
 import "server-only";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
+import type { CreditTransactionRecord, OrderRecord } from "@/types/billing";
 import type { ImageTaskRecord } from "@/types/task";
 
 export interface DbUser {
@@ -9,6 +10,8 @@ export interface DbUser {
   passwordHash: string;
   name: string;
   avatar?: string | null;
+  credits: number;
+  role: "user" | "admin";
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +37,8 @@ interface DatabaseShape {
   users: DbUser[];
   sessions: DbSession[];
   passwordResetTokens: DbPasswordResetToken[];
+  creditTransactions: CreditTransactionRecord[];
+  orders: OrderRecord[];
   imageTasks: ImageTaskRecord[];
 }
 
@@ -41,6 +46,8 @@ const EMPTY_DB: DatabaseShape = {
   users: [],
   sessions: [],
   passwordResetTokens: [],
+  creditTransactions: [],
+  orders: [],
   imageTasks: []
 };
 
@@ -69,9 +76,17 @@ async function readDb(): Promise<DatabaseShape> {
   const data = JSON.parse(raw || "{}") as Partial<DatabaseShape>;
 
   return {
-    users: Array.isArray(data.users) ? data.users : [],
+    users: Array.isArray(data.users)
+      ? data.users.map((user) => ({
+          ...user,
+          credits: typeof user.credits === "number" ? user.credits : 0,
+          role: user.role === "admin" ? "admin" : "user"
+        }))
+      : [],
     sessions: Array.isArray(data.sessions) ? data.sessions : [],
     passwordResetTokens: Array.isArray(data.passwordResetTokens) ? data.passwordResetTokens : [],
+    creditTransactions: Array.isArray(data.creditTransactions) ? data.creditTransactions : [],
+    orders: Array.isArray(data.orders) ? data.orders : [],
     imageTasks: Array.isArray(data.imageTasks) ? data.imageTasks : []
   };
 }

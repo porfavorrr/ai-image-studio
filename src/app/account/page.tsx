@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { apiClient, getImageErrorMessage } from "@/lib/api-client";
+import type { CreditTransactionRecord } from "@/types/billing";
 import type { ImageTaskRecord } from "@/types/task";
 import type { PublicUser } from "@/types/user";
 
@@ -13,6 +14,7 @@ export default function AccountPage() {
   const router = useRouter();
   const [user, setUser] = useState<PublicUser | null>(null);
   const [tasks, setTasks] = useState<ImageTaskRecord[]>([]);
+  const [transactions, setTransactions] = useState<CreditTransactionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -22,10 +24,11 @@ export default function AccountPage() {
   const [passwordMessage, setPasswordMessage] = useState("");
 
   useEffect(() => {
-    Promise.all([apiClient.me(), apiClient.listTasks()])
-      .then(([me, taskResponse]) => {
+    Promise.all([apiClient.me(), apiClient.listTasks(), apiClient.listCreditTransactions()])
+      .then(([me, taskResponse, transactionResponse]) => {
         setUser(me.user);
         setTasks(taskResponse.tasks);
+        setTransactions(transactionResponse.transactions);
       })
       .catch(() => router.push("/login?redirect=/account"))
       .finally(() => setLoading(false));
@@ -99,12 +102,44 @@ export default function AccountPage() {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <InfoBlock label="当前积分余额" value={`${user.credits} 积分`} />
             <InfoBlock label="注册时间" value={new Date(user.createdAt).toLocaleDateString("zh-CN")} />
             <InfoBlock label="累计生成次数" value={`${succeededTasks.length} 次`} />
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
             <InfoBlock
               label="最近一次生成"
               value={latestTask ? new Date(latestTask.createdAt).toLocaleString("zh-CN") : "暂无记录"}
             />
+            <Link href="/pricing" className="rounded-lg border border-studio-200 bg-studio-50 p-4 transition hover:border-studio-300">
+              <p className="text-sm font-semibold text-studio-700">购买积分</p>
+              <p className="mt-2 text-lg font-bold text-ink">每次生成消耗 1 积分</p>
+            </Link>
+          </div>
+
+          <div className="mt-8 rounded-lg border border-line bg-white p-5">
+            <h2 className="text-xl font-bold text-ink">最近积分流水</h2>
+            <div className="mt-4 grid gap-3">
+              {transactions.slice(0, 5).length === 0 ? (
+                <p className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-muted">暂无积分流水。</p>
+              ) : null}
+              {transactions.slice(0, 5).map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between gap-4 rounded-lg bg-slate-50 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-ink">{transaction.reason}</p>
+                    <p className="mt-1 text-xs text-muted">{new Date(transaction.createdAt).toLocaleString("zh-CN")}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-bold ${transaction.amount > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                      {transaction.amount > 0 ? "+" : ""}
+                      {transaction.amount}
+                    </p>
+                    <p className="mt-1 text-xs text-muted">余额 {transaction.balanceAfter}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-8 rounded-lg border border-line bg-white p-5">

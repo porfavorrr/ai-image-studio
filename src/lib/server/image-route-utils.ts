@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { BillingError } from "@/lib/billing";
 import { ImageRequestError } from "@/lib/server/image-validation";
 
 export function createId(prefix: string) {
@@ -7,6 +8,19 @@ export function createId(prefix: string) {
 
 export function imageErrorResponse(error: unknown) {
   if (error instanceof ImageRequestError) {
+    return NextResponse.json(
+      {
+        status: "failed",
+        error: {
+          code: error.code,
+          message: error.message
+        }
+      },
+      { status: error.status }
+    );
+  }
+
+  if (error instanceof BillingError) {
     return NextResponse.json(
       {
         status: "failed",

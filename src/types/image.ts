@@ -46,6 +46,7 @@ export interface EditImageResponse {
   provider?: ImageProvider;
   results: EditImageResult[];
   historyItem: HistoryItem;
+  latestCredits?: number;
 }
 
 export interface ProductImageRequest {
@@ -71,6 +72,7 @@ export interface ProductImageResponse {
   mode: ImageApiMode;
   provider?: ImageProvider;
   results: ProductImageResult[];
+  latestCredits?: number;
 }
 
 export interface PosterImageRequest {
@@ -93,6 +95,7 @@ export interface PosterImageResponse {
   mode: ImageApiMode;
   provider?: ImageProvider;
   results: PosterImageResult[];
+  latestCredits?: number;
 }
 
 export interface ImageApiErrorBody {

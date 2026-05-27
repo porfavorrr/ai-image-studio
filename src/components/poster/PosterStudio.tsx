@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { CalendarDays, MessageCircle, Newspaper, PenTool, Trophy } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { LayerPanel } from "@/components/poster/LayerPanel";
@@ -59,6 +60,7 @@ export function PosterStudio() {
       setResults(response.results);
       setActiveResult(response.results[0]);
       setVariantIndex(0);
+      window.dispatchEvent(new CustomEvent("ai-image-credits-updated"));
     } catch (requestError) {
       if (isUnauthorizedError(requestError)) {
         window.location.href = "/login?redirect=/poster";
@@ -83,8 +85,13 @@ export function PosterStudio() {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {error}
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 sm:flex-row sm:items-center sm:justify-between">
+          <span>{error}</span>
+          {error.includes("积分不足") ? (
+            <Link href="/pricing" className="text-studio-700 underline">
+              购买积分
+            </Link>
+          ) : null}
         </div>
       ) : null}
 

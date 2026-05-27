@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { assertHasCredits, consumeCredit } from "@/lib/billing";
 import { buildEditPrompt, buildPosterPrompt, buildProductPrompt, editToolLabels } from "@/lib/server/image-prompt-builder";
 import { getImageProviderService } from "@/lib/server/image-provider";
 import { normalizeResultImages, saveUploadFile } from "@/lib/server/image-storage";
@@ -88,6 +89,7 @@ export async function runEditTask(input: {
 }) {
   const provider = getImageProviderService();
   const prompt = buildEditPrompt(input.tool, input.prompt);
+  await assertHasCredits(input.userId);
   const task = createTask({
     userId: input.userId,
     type: "edit",
@@ -115,6 +117,7 @@ export async function runEditTask(input: {
       status: "succeeded",
       ...saved
     });
+    const latestCredits = await consumeCredit(input.userId, "图片生成");
 
     return {
       taskId: task.id,
@@ -129,6 +132,7 @@ export async function runEditTask(input: {
           label: "效果图 1"
         }
       ],
+      latestCredits,
       historyItem: {
         id: task.id,
         title: editToolLabels[input.tool],
@@ -154,6 +158,7 @@ export async function runProductTask(input: {
 }) {
   const provider = getImageProviderService();
   const prompt = buildProductPrompt(input);
+  await assertHasCredits(input.userId);
   const task = createTask({
     userId: input.userId,
     type: "product",
@@ -181,12 +186,14 @@ export async function runProductTask(input: {
       status: "succeeded",
       ...saved
     });
+    const latestCredits = await consumeCredit(input.userId, "图片生成");
 
     return {
       taskId: task.id,
       status: "succeeded" as const,
       mode: provider.name === "mock" ? "mock" : "real",
       provider: provider.name,
+      latestCredits,
       results: [
         {
           id: "product-result-1",
@@ -213,6 +220,7 @@ export async function runPosterTask(input: {
 }) {
   const provider = getImageProviderService();
   const prompt = buildPosterPrompt(input);
+  await assertHasCredits(input.userId);
   const task = createTask({
     userId: input.userId,
     type: "poster",
@@ -236,12 +244,14 @@ export async function runPosterTask(input: {
       status: "succeeded",
       ...saved
     });
+    const latestCredits = await consumeCredit(input.userId, "图片生成");
 
     return {
       taskId: task.id,
       status: "succeeded" as const,
       mode: provider.name === "mock" ? "mock" : "real",
       provider: provider.name,
+      latestCredits,
       results: [
         {
           id: "poster-result-1",

@@ -25,10 +25,16 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    apiClient
-      .me()
-      .then((response) => setUser(response.user))
-      .catch(() => setUser(null));
+    const refreshUser = () => {
+      apiClient
+        .me()
+        .then((response) => setUser(response.user))
+        .catch(() => setUser(null));
+    };
+
+    refreshUser();
+    window.addEventListener("ai-image-credits-updated", refreshUser);
+    return () => window.removeEventListener("ai-image-credits-updated", refreshUser);
   }, [pathname]);
 
   const handleLogout = async () => {
@@ -75,6 +81,9 @@ export function Header() {
               <Link href="/history" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:block">
                 历史记录
               </Link>
+              <Link href="/pricing" className="hidden rounded-lg bg-studio-50 px-3 py-2 text-sm font-semibold text-studio-700 sm:block">
+                积分：{user.credits}
+              </Link>
               <div className="relative">
                 <button
                   type="button"
@@ -89,12 +98,22 @@ export function Header() {
                 </button>
                 {menuOpen ? (
                   <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-line bg-white shadow-xl">
+                    <div className="border-b border-line px-4 py-3 text-sm font-semibold text-studio-700">
+                      剩余积分：{user.credits}
+                    </div>
                     <Link
                       href="/account"
                       className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
                       onClick={() => setMenuOpen(false)}
                     >
                       账户中心
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      购买积分
                     </Link>
                     <Link
                       href="/history"

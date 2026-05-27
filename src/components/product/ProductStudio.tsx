@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ImagePlus, SlidersHorizontal } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
@@ -80,6 +81,7 @@ export function ProductStudio() {
       }
 
       setResults(response.results);
+      window.dispatchEvent(new CustomEvent("ai-image-credits-updated"));
     } catch (requestError) {
       if (isUnauthorizedError(requestError)) {
         router.push("/login?redirect=/product");
@@ -109,8 +111,13 @@ export function ProductStudio() {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {error}
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 sm:flex-row sm:items-center sm:justify-between">
+          <span>{error}</span>
+          {error.includes("积分不足") ? (
+            <Link href="/pricing" className="text-studio-700 underline">
+              购买积分
+            </Link>
+          ) : null}
         </div>
       ) : null}
 

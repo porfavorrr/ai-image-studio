@@ -3,6 +3,8 @@ export interface PublicUser {
   email: string;
   name: string;
   avatar?: string | null;
+  credits: number;
+  role: "user" | "admin";
   createdAt: string;
 }
 

@@ -29,6 +29,8 @@ function toPublicUser(user: {
   email: string;
   name: string;
   avatar?: string | null;
+  credits?: number;
+  role?: "user" | "admin";
   createdAt: string;
 }): PublicUser {
   return {
@@ -36,6 +38,8 @@ function toPublicUser(user: {
     email: user.email,
     name: user.name,
     avatar: user.avatar ?? null,
+    credits: user.credits ?? 0,
+    role: user.role ?? "user",
     createdAt: user.createdAt
   };
 }
@@ -94,11 +98,22 @@ export async function registerUser(input: unknown) {
       passwordHash,
       name,
       avatar: null,
+      credits: 1,
+      role: "user" as const,
       createdAt: now,
       updatedAt: now
     };
 
     db.users.push(created);
+    db.creditTransactions.push({
+      id: randomUUID(),
+      userId: created.id,
+      type: "grant",
+      amount: 1,
+      balanceAfter: 1,
+      reason: "新用户免费体验额度",
+      createdAt: now
+    });
     return created;
   });
 

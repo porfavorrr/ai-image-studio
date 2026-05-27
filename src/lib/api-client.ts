@@ -9,6 +9,7 @@ import type {
   ProductImageRequest,
   ProductImageResponse
 } from "@/types/image";
+import type { CreditPackageId, CreditTransactionsResponse, OrderDetailResponse, OrderRecord } from "@/types/billing";
 import type { ImageTaskDetailResponse, ImageTaskListResponse } from "@/types/task";
 import type { TemplateItem } from "@/types/template";
 import type { AuthResponse } from "@/types/user";
@@ -204,6 +205,39 @@ export const apiClient = {
     return requestJson<{ ok: boolean; message: string }>("/api/auth/reset-password", {
       method: "POST",
       body: JSON.stringify(payload)
+    });
+  },
+
+  createOrder(payload: { packageId: CreditPackageId }) {
+    return requestJson<{ orderId: string; order: OrderRecord }>("/api/orders", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  getOrder(id: string) {
+    return requestJson<OrderDetailResponse>(`/api/orders/${id}`);
+  },
+
+  updateOrderRemark(id: string, payload: { remark: string }) {
+    return requestJson<OrderDetailResponse>(`/api/orders/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  listCreditTransactions() {
+    return requestJson<CreditTransactionsResponse>("/api/credits/transactions");
+  },
+
+  listAdminOrders() {
+    return requestJson<{ orders: OrderRecord[] }>("/api/admin/orders");
+  },
+
+  confirmAdminOrder(id: string) {
+    return requestJson<{ order: OrderRecord; latestCredits: number }>(`/api/admin/orders/${id}/confirm`, {
+      method: "POST",
+      body: JSON.stringify({})
     });
   },
 

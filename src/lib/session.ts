@@ -26,6 +26,8 @@ function publicUser(user: {
   email: string;
   name: string;
   avatar?: string | null;
+  credits?: number;
+  role?: "user" | "admin";
   createdAt: string;
 }): PublicUser {
   return {
@@ -33,6 +35,8 @@ function publicUser(user: {
     email: user.email,
     name: user.name,
     avatar: user.avatar ?? null,
+    credits: user.credits ?? 0,
+    role: user.role ?? "user",
     createdAt: user.createdAt
   };
 }
