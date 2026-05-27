@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 
 export const metadata: Metadata = {
   title: "AI 图片助手 - AI Image Studio",
-  description: "一句话完成修图、换背景、商品图与封面海报生成的 AI P 图网站 Demo。"
+  description: "一句话完成智能修图、商品图生成与封面海报创作。"
 };
 
 export default function RootLayout({

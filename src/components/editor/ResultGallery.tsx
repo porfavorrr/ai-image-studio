@@ -1,76 +1,100 @@
 "use client";
 
-import { CheckCircle2, Download, Image as ImageIcon } from "lucide-react";
+import Link from "next/link";
+import { Download, History, PenLine, RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { downloadImage } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
 import type { EditImageResult } from "@/types/image";
 
 interface ResultGalleryProps {
   results: EditImageResult[];
   selectedId?: string;
   loading?: boolean;
-  placeholder?: boolean;
+  error?: string;
   onSelect: (result: EditImageResult) => void;
+  onRetry?: () => void;
 }
 
-export function ResultGallery({ results, selectedId, loading, placeholder, onSelect }: ResultGalleryProps) {
+export function ResultGallery({ results, loading, error, onSelect, onRetry }: ResultGalleryProps) {
+  const mainResult = results[0];
+
   return (
-    <Card className="min-h-[420px] p-5">
-      <div className="mb-4 flex items-center justify-between">
+    <Card className="min-h-[660px] p-5 shadow-soft">
+      <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold text-studio-600">生成结果</p>
-          <h2 className="mt-1 text-xl font-bold text-ink">{results.length} 张候选效果</h2>
+          <h2 className="mt-1 text-xl font-bold text-ink">主结果预览</h2>
         </div>
-        {placeholder ? (
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">示例</span>
+        {mainResult ? (
+          <span className="rounded-full bg-studio-50 px-3 py-1 text-xs font-semibold text-studio-700">
+            已生成
+          </span>
         ) : null}
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="h-[315px] animate-pulse rounded-lg bg-slate-100" />
-          ))}
+        <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-line bg-slate-50 px-6 text-center">
+          <div>
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-studio-100 border-t-studio-600" />
+            <p className="mt-5 text-lg font-bold text-ink">图片生成中，请稍候</p>
+            <p className="mt-2 text-sm text-muted">正在处理图片细节，完成后会自动展示结果。</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-6 text-center">
+          <div className="max-w-md">
+            <p className="text-lg font-bold text-rose-700">生成失败，请稍后重试</p>
+            <p className="mt-2 text-sm leading-6 text-rose-600">{error}</p>
+            {onRetry ? (
+              <Button className="mt-5" variant="outline" onClick={onRetry}>
+                <RefreshCcw className="h-4 w-4" />
+                重试
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      ) : !mainResult ? (
+        <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
+          <div>
+            <p className="text-lg font-bold text-ink">生成结果将在这里展示</p>
+            <p className="mt-2 text-sm text-muted">上传图片并描述需求后，即可查看 AI 处理结果</p>
+          </div>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
-          {results.map((result) => {
-            const active = selectedId === result.id;
-            return (
-              <div
-                key={result.id}
-                className={cn(
-                  "group overflow-hidden rounded-lg border bg-white text-left transition duration-200",
-                  active ? "border-studio-500 shadow-lg shadow-indigo-500/15" : "border-line hover:-translate-y-1 hover:shadow-card"
-                )}
-              >
-                <button type="button" className="relative block w-full text-left" onClick={() => onSelect(result)}>
-                  <SmartImage src={result.url} alt={result.label} className="h-[270px] w-full rounded-none border-0" />
-                  {active ? (
-                    <span className="absolute right-3 top-3 rounded-full bg-studio-600 p-1 text-white shadow-lg">
-                      <CheckCircle2 className="h-4 w-4" />
-                    </span>
-                  ) : null}
-                </button>
-                <div className="flex items-center justify-between gap-2 px-4 py-3">
-                  <button type="button" className="flex min-w-0 items-center gap-2" onClick={() => onSelect(result)}>
-                    <ImageIcon className="h-4 w-4 shrink-0 text-studio-500" />
-                    <span className="truncate text-sm font-semibold text-ink">{result.label}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line text-slate-600 transition hover:border-studio-200 hover:bg-studio-50 hover:text-studio-700"
-                    aria-label={`下载${result.label}`}
-                    onClick={() => downloadImage(result.url)}
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div>
+          <div className="overflow-hidden rounded-2xl border border-line bg-slate-50 shadow-sm">
+            <SmartImage
+              src={mainResult.url}
+              alt={mainResult.label || "生成结果"}
+              className="h-[520px] w-full rounded-none border-0 bg-slate-50"
+              imageClassName="object-contain p-4"
+            />
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-ink">{mainResult.label || "生成结果"}</p>
+              <p className="mt-1 text-xs text-muted">结果已保存，可下载或继续修改。</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => downloadImage(mainResult.url)}>
+                <Download className="h-4 w-4" />
+                下载图片
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onSelect(mainResult)}>
+                <PenLine className="h-4 w-4" />
+                继续修改
+              </Button>
+              <Link href="/history">
+                <Button variant="dark" size="sm">
+                  <History className="h-4 w-4" />
+                  查看历史记录
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </Card>

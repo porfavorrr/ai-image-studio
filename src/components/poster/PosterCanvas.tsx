@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { SmartImage } from "@/components/ui/SmartImage";
-import { mockImages } from "@/lib/mock-images";
 import { cn } from "@/lib/utils";
 import type { PosterRatio, PosterStyle } from "@/types/image";
 
@@ -67,16 +66,17 @@ export function PosterCanvas({ title, subtitle, style, ratio, palette, variantIn
         {!backgroundImage ? (
           <div
             className={cn(
-              "absolute overflow-hidden rounded-2xl border border-white/70 bg-white/40 p-2 shadow-xl backdrop-blur",
+              "absolute overflow-hidden rounded-2xl border border-white/70 bg-white/36 p-5 shadow-xl backdrop-blur",
               compact ? "right-8 top-1/2 hidden h-40 w-52 -translate-y-1/2 md:block" : "bottom-28 right-8 h-44 w-40"
             )}
           >
-            <SmartImage
-              src={mockImages.posterStudy}
-              alt="学习场景海报素材"
-              className="h-full w-full border-0"
-              imageClassName="object-cover"
-            />
+            <div className="h-12 rounded-lg bg-white/72" />
+            <div className="mt-4 h-3 w-4/5 rounded-full bg-white/78" />
+            <div className="mt-2 h-3 w-3/5 rounded-full bg-white/62" />
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="h-12 rounded-lg bg-white/55" />
+              <div className="h-12 rounded-lg bg-white/45" />
+            </div>
           </div>
         ) : null}
         <div className="absolute right-7 top-7 rounded-lg border border-white/55 bg-white/38 px-3 py-2 text-xs font-semibold text-slate-700 backdrop-blur">

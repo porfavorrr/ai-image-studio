@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ImagePlus, Layers3, Paintbrush, ScanLine, ShoppingBag } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { taskCards, toolPrompts } from "@/lib/mock-data";
+import { taskCards, toolPrompts } from "@/lib/studio-content";
 import { useStudioStore } from "@/lib/studio-store";
 import type { EditTool } from "@/types/image";
 
@@ -22,7 +22,7 @@ export function TaskCards() {
           <h2 className="mt-2 text-2xl font-bold tracking-normal text-ink">从一个明确目标开始</h2>
         </div>
         <p className="hidden max-w-xl text-sm leading-6 text-muted md:block">
-          每个入口都对应真实产品里的独立工作流，当前会走 mock API，后续可替换为真实图像服务。
+          选择一个常用图片任务，上传素材后即可生成并保存结果。
         </p>
       </div>
 

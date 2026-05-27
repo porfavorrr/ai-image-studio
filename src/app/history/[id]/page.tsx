@@ -1,0 +1,99 @@
+"use client";
+
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { SmartImage } from "@/components/ui/SmartImage";
+import { apiClient, downloadImage } from "@/lib/api-client";
+import type { ImageTaskRecord } from "@/types/task";
+
+const typeLabels: Record<ImageTaskRecord["type"], string> = {
+  edit: "智能修图",
+  product: "商品图生成",
+  poster: "封面海报生成"
+};
+
+export default function HistoryDetailPage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const [task, setTask] = useState<ImageTaskRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient
+      .getTask(params.id)
+      .then((response) => setTask(response.task))
+      .catch(() => router.push("/history"))
+      .finally(() => setLoading(false));
+  }, [params.id, router]);
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-[1200px] px-5 py-10">
+        <Card className="h-[520px] animate-pulse p-6" />
+      </main>
+    );
+  }
+
+  if (!task) return null;
+
+  const images = task.resultImages?.length ? task.resultImages : task.resultImageUrl ? [task.resultImageUrl] : [];
+
+  return (
+    <main className="mx-auto max-w-[1200px] px-5 py-10">
+      <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <p className="text-sm font-semibold text-studio-600">{typeLabels[task.type]}</p>
+          <h1 className="mt-2 text-3xl font-bold text-ink">生成结果详情</h1>
+        </div>
+        <Link href="/history">
+          <Button variant="outline">返回历史记录</Button>
+        </Link>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <Card className="p-5">
+          {images.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {images.map((image, index) => (
+                <div key={image} className="overflow-hidden rounded-lg border border-line bg-white">
+                  <SmartImage src={image} alt={`生成结果 ${index + 1}`} className="h-[420px] w-full rounded-none border-0" />
+                  <div className="p-4">
+                    <Button variant="dark" className="w-full" onClick={() => downloadImage(image)}>
+                      <Download className="h-4 w-4" />
+                      下载图片
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-[420px] items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-muted">
+              {task.errorMessage || "生成结果暂不可用"}
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="text-xl font-bold text-ink">任务信息</h2>
+          <Info label="状态" value={task.status === "succeeded" ? "已完成" : task.status === "failed" ? "生成失败" : "处理中"} />
+          <Info label="创建时间" value={new Date(task.createdAt).toLocaleString("zh-CN")} />
+          <Info label="生成需求" value={task.prompt} />
+          {task.errorMessage ? <Info label="失败原因" value={task.errorMessage} /> : null}
+        </Card>
+      </div>
+    </main>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="mt-5">
+      <p className="text-sm font-semibold text-muted">{label}</p>
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink">{value}</p>
+    </div>
+  );
+}

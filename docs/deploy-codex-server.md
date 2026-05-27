@@ -275,6 +275,73 @@ Codex 生成图片可能耗时较久，需要同时调大：
 - Python 服务中的 `CODEX_TIMEOUT_SECONDS`
 - Nginx 的 `proxy_read_timeout`
 
+如果 Python API 返回 504，例如：
+
+```text
+Codex timed out after 900s. Job dir: /data/codex_image_api_runs/...
+```
+
+说明 Next.js 和 Python API 的连接是通的，真正卡住的是 Python 里启动的 `codex exec` 子进程。按下面顺序排查：
+
+```bash
+cd /data/codex_image_api_runs/<date>/<job-id>
+cat command.txt
+cat prompt.txt
+cat stdout.txt 2>/dev/null
+cat stderr.txt 2>/dev/null
+```
+
+然后直接复现那条命令：
+
+```bash
+cd /data/codex_image_api_runs/<date>/<job-id>
+bash -lc "$(cat command.txt) < prompt.txt"
+```
+
+常见原因：
+
+- Codex CLI 没有在当前运行用户下登录，子进程在等待认证。
+- Codex CLI 所在环境不能联网，模型请求一直失败或重试。
+- 当前 Codex CLI 不具备真实图片生成能力，只会执行文本/代码任务。
+- 生成图片本身耗时超过 900 秒。
+
+如果只是生成慢，可以把几个超时一起调大：
+
+```bash
+# Next.js .env.local
+CODEX_IMAGE_API_TIMEOUT_SECONDS=1800
+
+# Python API 启动环境
+CODEX_TIMEOUT_SECONDS=1800
+
+# Nginx
+proxy_read_timeout 1850s;
+proxy_send_timeout 1850s;
+```
+
+调试成功任务时想保留输出目录，可以给 Python API 加：
+
+```bash
+CODEX_IMAGE_API_KEEP_JOBS=1
+```
+
+如果你的图片生成不是由 `codex exec` 默认命令完成，而是由其他本地脚本或命令完成，可以配置 `CODEX_IMAGE_COMMAND` 覆盖默认命令。可用变量：
+
+```text
+$prompt_file
+$output_path
+$workdir
+$reference_path
+$reference_paths
+$codex_bin
+```
+
+示例：
+
+```bash
+CODEX_IMAGE_COMMAND='python3 /opt/image-worker/generate.py --prompt-file $prompt_file --output $output_path --references $reference_paths'
+```
+
 ### 图片过大
 
 前端 Next API 当前限制单图 10MB。Python API 默认请求体最大 20MB。Nginx 示例中是 25MB。

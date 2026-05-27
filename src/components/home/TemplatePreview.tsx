@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SmartImage } from "@/components/ui/SmartImage";
-import { editMockResults, mockImages, templates } from "@/lib/mock-data";
+import { imageAssets } from "@/lib/image-assets";
+import { templates } from "@/lib/studio-content";
 import { formatUsageCount } from "@/lib/utils";
 
 export function TemplatePreview() {
@@ -63,13 +64,13 @@ export function TemplatePreview() {
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-slate-100">
           <div className="grid grid-cols-2">
             <div className="relative">
-              <SmartImage src={mockImages.original} alt="原图" className="h-72 w-full rounded-none border-0" />
+              <SmartImage src={imageAssets.original} alt="原图" className="h-72 w-full rounded-none border-0" />
               <span className="absolute left-3 top-3 rounded-full bg-white/88 px-3 py-1 text-xs font-semibold text-slate-700">
                 Before
               </span>
             </div>
             <div className="relative border-l border-white">
-              <SmartImage src={editMockResults[0].url} alt="效果图" className="h-72 w-full rounded-none border-0" />
+              <SmartImage src={imageAssets.edit1} alt="效果图" className="h-72 w-full rounded-none border-0" />
               <span className="absolute left-3 top-3 rounded-full bg-studio-600 px-3 py-1 text-xs font-semibold text-white">
                 After
               </span>
@@ -78,7 +79,7 @@ export function TemplatePreview() {
         </div>
 
         <div className="mt-6 grid gap-3">
-          {["前端调用真实 API 路径", "后端 route handler 返回结构化任务结果", "结果可继续进入编辑工作流"].map((item) => (
+          {["上传原图，描述目标效果", "生成结果自动保存到历史记录", "满意后下载或继续编辑"].map((item) => (
             <div key={item} className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-700">
               <Check className="h-4 w-4 text-emerald-500" />
               {item}

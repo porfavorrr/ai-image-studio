@@ -1,27 +1,8 @@
 import { NextResponse } from "next/server";
 import { ImageRequestError } from "@/lib/server/image-validation";
 
-export type ImageProvider = "openai" | "codex";
-
 export function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
-}
-
-export function getImageProvider(): ImageProvider {
-  const provider = (process.env.IMAGE_PROVIDER || process.env.IMAGE_API_PROVIDER || "openai").toLowerCase();
-  return provider === "codex" ? "codex" : "openai";
-}
-
-export function shouldUseMockImageApi() {
-  if (process.env.IMAGE_API_MODE !== "real") {
-    return true;
-  }
-
-  if (getImageProvider() === "openai") {
-    return !process.env.OPENAI_API_KEY;
-  }
-
-  return false;
 }
 
 export function imageErrorResponse(error: unknown) {
@@ -39,6 +20,18 @@ export function imageErrorResponse(error: unknown) {
   }
 
   const message = error instanceof Error ? error.message : "图片生成失败，请稍后重试";
+  if (message === "UNAUTHORIZED") {
+    return NextResponse.json(
+      {
+        status: "failed",
+        error: {
+          code: "UNAUTHORIZED",
+          message: "请先登录后再使用图片生成功能"
+        }
+      },
+      { status: 401 }
+    );
+  }
 
   return NextResponse.json(
     {

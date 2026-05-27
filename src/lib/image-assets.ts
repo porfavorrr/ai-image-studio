@@ -1,7 +1,7 @@
 const unsplash = (id: string, width = 1200, height = 900) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&h=${height}&q=82`;
 
-export const mockImageSets = {
+export const imageAssetSets = {
   products: [
     unsplash("1541643600914-78b084683601", 1000, 1000),
     unsplash("1522335789203-aabd1fc54bc9", 1000, 1000),
@@ -30,32 +30,25 @@ export const mockImageSets = {
     unsplash("1497366811353-6870744d04b2", 1200, 900),
     unsplash("1518005020951-eccb494ad742", 1200, 900),
     unsplash("1500530855697-b586d89ba3ee", 1200, 900)
-  ],
-  backgrounds: [
-    unsplash("1500530855697-b586d89ba3ee", 1200, 900),
-    unsplash("1497366754035-f200968a6e72", 1200, 900),
-    unsplash("1513519245088-0e12902e5a38", 1200, 900)
   ]
 };
 
-export const mockImages = {
-  original: mockImageSets.products[0],
-  edit1: mockImageSets.products[1],
-  edit2: mockImageSets.productScenes[0],
-  edit3: mockImageSets.productScenes[2],
-  product1: mockImageSets.products[0],
-  product2: mockImageSets.productScenes[0],
-  product3: mockImageSets.productScenes[3],
-  product4: mockImageSets.products[2],
-  poster1: mockImageSets.posters[0],
-  poster2: mockImageSets.posters[1],
-  poster3: mockImageSets.posters[2],
-  poster4: mockImageSets.posters[3],
-  poster5: mockImageSets.posters[4],
-  poster6: mockImageSets.workspaces[1],
-  portraitBusiness: mockImageSets.portraits[0],
-  workspaceBefore: mockImageSets.workspaces[0],
-  workspaceAfter: mockImageSets.workspaces[1],
-  posterStudy: mockImageSets.posters[0],
-  heroBackground: mockImageSets.workspaces[2]
+export const imageAssets = {
+  original: imageAssetSets.products[0],
+  edit1: imageAssetSets.products[1],
+  edit2: imageAssetSets.productScenes[0],
+  edit3: imageAssetSets.productScenes[2],
+  product1: imageAssetSets.products[0],
+  product2: imageAssetSets.productScenes[0],
+  product3: imageAssetSets.productScenes[3],
+  product4: imageAssetSets.products[2],
+  poster1: imageAssetSets.posters[0],
+  poster2: imageAssetSets.posters[1],
+  poster3: imageAssetSets.posters[2],
+  poster4: imageAssetSets.posters[3],
+  poster5: imageAssetSets.posters[4],
+  poster6: imageAssetSets.workspaces[1],
+  portraitBusiness: imageAssetSets.portraits[0],
+  posterStudy: imageAssetSets.posters[0],
+  heroBackground: imageAssetSets.workspaces[2]
 };

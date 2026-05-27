@@ -3,7 +3,7 @@
 import { WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { posterStyleLabels } from "@/lib/mock-data";
+import { posterStyleLabels } from "@/lib/studio-content";
 import { cn } from "@/lib/utils";
 import type { PosterRatio, PosterStyle } from "@/types/image";
 

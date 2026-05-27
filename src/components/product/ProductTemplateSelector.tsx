@@ -1,7 +1,7 @@
 "use client";
 
 import { Gift, Heart, Package, Sparkles } from "lucide-react";
-import { productTemplateLabels } from "@/lib/mock-data";
+import { productTemplateLabels } from "@/lib/studio-content";
 import { cn } from "@/lib/utils";
 import type { ProductTemplate } from "@/types/image";
 
@@ -37,15 +37,15 @@ export function ProductTemplateSelector({ value, onChange }: ProductTemplateSele
                 ? "border-studio-500 bg-studio-50 shadow-sm"
                 : "border-line bg-white hover:border-studio-200 hover:bg-studio-50/60"
             )}
-            onClick={() => onChange(option.key)}
-          >
+              onClick={() => onChange(option.key)}
+            >
             <span
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-lg",
                 active ? "bg-studio-600 text-white" : "bg-slate-100 text-slate-600"
               )}
             >
-              <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" />
             </span>
             <span>
               <span className="block font-semibold text-ink">{productTemplateLabels[option.key]}</span>

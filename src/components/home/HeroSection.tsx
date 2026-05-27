@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
-import { mockImages } from "@/lib/mock-data";
+import { imageAssets } from "@/lib/image-assets";
 import { useStudioStore } from "@/lib/studio-store";
 
 export function HeroSection() {
@@ -16,7 +16,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden rounded-lg border border-white/70 bg-slate-950 px-5 py-14 shadow-soft lg:px-12 lg:py-20">
       <SmartImage
-        src={mockImages.heroBackground}
+        src={imageAssets.heroBackground}
         alt="现代图片工作台背景"
         className="absolute inset-0 border-0 opacity-80"
         rounded={false}
@@ -27,7 +27,7 @@ export function HeroSection() {
       <div className="relative z-10 mx-auto max-w-5xl text-center text-white">
         <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-4 py-2 text-sm font-medium backdrop-blur">
           <WandSparkles className="h-4 w-4 text-cyan-200" />
-          AI 图片助手 Demo
+          AI 图片创作工作台
         </div>
         <h1 className="mx-auto max-w-4xl text-balance text-4xl font-bold leading-tight tracking-normal md:text-6xl">
           一句话完成修图、换背景、做商品图与封面海报
@@ -40,7 +40,7 @@ export function HeroSection() {
           <UploadDropzone
             compact
             title="把图片拖到这里，立即开始修图"
-            subtitle="当前 Demo 会保留上传预览，并进入完整编辑工作台"
+            subtitle="上传后进入编辑工作台，登录即可生成并保存结果"
             className="min-h-[260px] border-white/25 bg-white/90 text-ink"
             onImageSelected={(imageUrl, file) => {
               setUploadedImage(imageUrl, file);
@@ -64,7 +64,7 @@ export function HeroSection() {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-200">
-          {["换背景", "智能去物", "商品图生成", "封面海报", "可替换真实模型"].map((item) => (
+          {["换背景", "智能去物", "商品图生成", "封面海报", "生成记录保存"].map((item) => (
             <span key={item} className="inline-flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-cyan-200" />
               {item}
@@ -74,7 +74,7 @@ export function HeroSection() {
       </div>
 
       <div className="pointer-events-none relative z-10 mx-auto mt-14 grid max-w-5xl gap-4 md:grid-cols-3">
-        {[mockImages.edit1, mockImages.product2, mockImages.poster1].map((image, index) => (
+        {[imageAssets.edit1, imageAssets.product2, imageAssets.poster1].map((image, index) => (
           <div
             key={image}
             className="overflow-hidden rounded-lg border border-white/14 bg-white/10 p-2 shadow-2xl backdrop-blur"

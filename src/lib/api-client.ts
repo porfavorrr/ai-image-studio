@@ -9,7 +9,18 @@ import type {
   ProductImageRequest,
   ProductImageResponse
 } from "@/types/image";
+import type { ImageTaskDetailResponse, ImageTaskListResponse } from "@/types/task";
 import type { TemplateItem } from "@/types/template";
+import type { AuthResponse } from "@/types/user";
+
+export interface CaptchaResponse {
+  question: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  resetUrl: string | null;
+}
 
 export class ImageApiClientError extends Error {
   code: string;
@@ -116,6 +127,10 @@ export function getImageErrorMessage(error: unknown) {
   return "网络请求失败，请稍后重试";
 }
 
+export function isUnauthorizedError(error: unknown) {
+  return error instanceof ImageApiClientError && error.code === "UNAUTHORIZED";
+}
+
 export async function downloadImage(url: string, filename = `ai-image-result-${Date.now()}.png`) {
   const anchor = document.createElement("a");
   anchor.download = filename;
@@ -142,6 +157,64 @@ export async function downloadImage(url: string, filename = `ai-image-result-${D
 }
 
 export const apiClient = {
+  captcha() {
+    return requestJson<CaptchaResponse>("/api/captcha");
+  },
+
+  register(payload: { name: string; email: string; password: string; confirmPassword: string; captchaAnswer: string }) {
+    return requestJson<AuthResponse>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  login(payload: { email: string; password: string; captchaAnswer: string }) {
+    return requestJson<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  logout() {
+    return requestJson<{ ok: boolean }>("/api/auth/logout", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+  },
+
+  me() {
+    return requestJson<AuthResponse>("/api/auth/me");
+  },
+
+  changePassword(payload: { oldPassword: string; newPassword: string }) {
+    return requestJson<{ ok: boolean; message: string }>("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  forgotPassword(payload: { email: string }) {
+    return requestJson<ForgotPasswordResponse>("/api/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  resetPassword(payload: { token: string; newPassword: string }) {
+    return requestJson<{ ok: boolean; message: string }>("/api/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+
+  listTasks() {
+    return requestJson<ImageTaskListResponse>("/api/tasks");
+  },
+
+  getTask(id: string) {
+    return requestJson<ImageTaskDetailResponse>(`/api/tasks/${id}`);
+  },
+
   async editImage(payload: EditImageRequest) {
     const image = await resolveImageFile(payload.image, payload.imageUrl, "edit-input");
     const formData = new FormData();

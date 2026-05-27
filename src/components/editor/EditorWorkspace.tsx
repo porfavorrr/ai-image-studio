@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { BeforeAfter } from "@/components/editor/BeforeAfter";
 import { HistoryTimeline } from "@/components/editor/HistoryTimeline";
@@ -9,8 +11,8 @@ import { ResultGallery } from "@/components/editor/ResultGallery";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card } from "@/components/ui/Card";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
-import { apiClient, getImageErrorMessage } from "@/lib/api-client";
-import { editMockResults, mockImages, toolPrompts } from "@/lib/mock-data";
+import { apiClient, getImageErrorMessage, isUnauthorizedError } from "@/lib/api-client";
+import { toolPrompts } from "@/lib/studio-content";
 import { sleep } from "@/lib/utils";
 import { useStudioStore } from "@/lib/studio-store";
 import type { EditTool } from "@/types/image";
@@ -18,6 +20,7 @@ import type { EditTool } from "@/types/image";
 const steps = ["上传图片", "描述需求", "生成结果", "继续修改"];
 
 export function EditorWorkspace() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const {
@@ -38,9 +41,9 @@ export function EditorWorkspace() {
     addHistoryItem
   } = useStudioStore();
 
-  const originalImage = uploadedImage ?? mockImages.original;
-  const visibleResults = editResults.length > 0 ? editResults : editMockResults;
-  const currentVersion = currentImage ?? selectedResult?.url ?? visibleResults[0]?.url ?? mockImages.edit1;
+  const originalImage = uploadedImage;
+  const visibleResults = editResults;
+  const currentVersion = currentImage ?? selectedResult?.url ?? visibleResults[0]?.url ?? null;
 
   const activeStep = useMemo(() => {
     if (editResults.length > 0) return 3;
@@ -53,13 +56,18 @@ export function EditorWorkspace() {
     const finalPrompt = prompt.trim() || toolPrompts[selectedTool] || "提升图片整体质感，画面更干净自然";
     const finalTool: EditTool = selectedTool || "custom";
 
+    if (!currentImageFile && !uploadedImageFile) {
+      setError("请先上传需要处理的图片");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
       const [response] = await Promise.all([
         apiClient.editImage({
           image: currentImageFile ?? uploadedImageFile ?? undefined,
-          imageUrl: currentImage ?? originalImage,
+          imageUrl: currentImage ?? originalImage ?? undefined,
           prompt: finalPrompt,
           tool: finalTool,
           size: "1024x1024",
@@ -80,6 +88,10 @@ export function EditorWorkspace() {
         thumbnail: response.results[0].url
       });
     } catch (requestError) {
+      if (isUnauthorizedError(requestError)) {
+        router.push("/login?redirect=/editor");
+        return;
+      }
       setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
@@ -109,8 +121,19 @@ export function EditorWorkspace() {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {error}
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 sm:flex-row sm:items-center sm:justify-between">
+          <span>{error}</span>
+          {error.includes("登录") ? (
+            <Link href="/login?redirect=/editor" className="text-studio-700 underline">
+              去登录
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="mb-6 rounded-lg border border-studio-200 bg-studio-50 px-4 py-3 text-sm font-semibold text-studio-700">
+          图片生成中，可能需要较长时间，请不要关闭页面。
         </div>
       ) : null}
 
@@ -135,8 +158,9 @@ export function EditorWorkspace() {
             results={visibleResults}
             selectedId={selectedResult?.id}
             loading={loading}
-            placeholder={editResults.length === 0}
+            error={error}
             onSelect={(result) => setSelectedResult(result)}
+            onRetry={handleGenerate}
           />
           <BeforeAfter before={originalImage} after={currentVersion} />
         </div>

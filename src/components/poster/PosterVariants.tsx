@@ -9,7 +9,7 @@ import type { PosterImageResult } from "@/types/image";
 
 interface PosterVariantsProps {
   results: PosterImageResult[];
-  activeId: string;
+  activeId?: string;
   loading?: boolean;
   onSelect: (result: PosterImageResult, index: number) => void;
 }
@@ -32,6 +32,13 @@ export function PosterVariants({ results, activeId, loading, onSelect }: PosterV
           {[1, 2, 3, 4, 5, 6].map((item) => (
             <div key={item} className="h-48 animate-pulse rounded-lg bg-slate-100" />
           ))}
+        </div>
+      ) : results.length === 0 ? (
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
+          <div>
+            <p className="text-base font-semibold text-ink">生成后将在这里展示海报背景</p>
+            <p className="mt-2 text-sm text-muted">输入标题和用途，即可生成可下载的封面背景。</p>
+          </div>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">

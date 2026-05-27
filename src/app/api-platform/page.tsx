@@ -2,8 +2,8 @@ import { ArrowRight, Braces, Cloud, Database, Image as ImageIcon, Layers, Route,
 import { PageShell } from "@/components/layout/PageShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { apiCapabilities } from "@/lib/mock-data";
-import { mockImages } from "@/lib/mock-images";
+import { imageAssets } from "@/lib/image-assets";
+import { apiCapabilities } from "@/lib/studio-content";
 
 const flow = [
   { label: "业务系统", icon: Route },
@@ -22,7 +22,7 @@ export default function ApiPlatformPage() {
         <h1 className="mt-5 text-4xl font-bold tracking-normal lg:text-5xl">图像能力 API 平台</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
           将图片生成、图片编辑、局部编辑、模板生成等能力封装为统一服务，供业务系统按任务方式调用。
-          当前 Demo 已保留 route handler、service 层与结构化响应，后续可直接替换真实图像服务。
+          当前已保留 route handler、service 层与结构化响应，后续可继续扩展模型、存储和业务配额。
         </p>
       </section>
 
@@ -70,7 +70,7 @@ export default function ApiPlatformPage() {
           <div className="border-b border-line bg-slate-50 px-5 py-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               <Braces className="h-4 w-4 text-studio-600" />
-              Mock 调用示例
+              调用示例
             </div>
           </div>
           <pre className="overflow-x-auto bg-slate-950 p-6 text-sm leading-7 text-slate-100">
@@ -78,19 +78,19 @@ export default function ApiPlatformPage() {
 Content-Type: application/json
 
 {
-  "imageUrl": "${mockImages.original}",
+  "imageUrl": "${imageAssets.original}",
   "prompt": "把背景换成干净的白色摄影棚，主体保持不变",
   "tool": "background"
 }
 
 Response
 {
-  "taskId": "mock-task-id",
+  "taskId": "task-id",
   "status": "succeeded",
   "results": [
     {
       "id": "result-1",
-      "url": "${mockImages.edit1}",
+      "url": "${imageAssets.edit1}",
       "type": "edited",
       "label": "效果图 1"
     }

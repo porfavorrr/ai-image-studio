@@ -1,21 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowRight, ChevronDown, LogOut, Sparkles, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import type { PublicUser } from "@/types/user";
 
 const navItems = [
-  { label: "产品介绍", href: "/" },
-  { label: "模板中心", href: "/templates" },
+  { label: "首页", href: "/" },
+  { label: "智能修图", href: "/editor" },
   { label: "商品图", href: "/product" },
   { label: "封面海报", href: "/poster" },
+  { label: "模板中心", href: "/templates" },
   { label: "API 平台", href: "/api-platform" }
 ];
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<PublicUser | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    apiClient
+      .me()
+      .then((response) => setUser(response.user))
+      .catch(() => setUser(null));
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => null);
+    setUser(null);
+    setMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  };
+
+  const trialHref = user ? "/editor" : "/login?redirect=/editor";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/70 bg-white/82 backdrop-blur-xl">
@@ -46,10 +70,62 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="hidden sm:inline-flex">
-            登录/注册
-          </Button>
-          <Link href="/editor">
+          {user ? (
+            <>
+              <Link href="/history" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:block">
+                历史记录
+              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-slate-50"
+                  onClick={() => setMenuOpen((value) => !value)}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-studio-100 text-studio-700">
+                    <UserRound className="h-4 w-4" />
+                  </span>
+                  <span className="hidden max-w-[120px] truncate sm:block">{user.name}</span>
+                  <ChevronDown className="h-4 w-4 text-slate-500" />
+                </button>
+                {menuOpen ? (
+                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-line bg-white shadow-xl">
+                    <Link
+                      href="/account"
+                      className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      账户中心
+                    </Link>
+                    <Link
+                      href="/history"
+                      className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      历史记录
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-rose-600 hover:bg-rose-50"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      退出登录
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:block">
+                登录
+              </Link>
+              <Link href="/register" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:block">
+                注册
+              </Link>
+            </>
+          )}
+          <Link href={trialHref}>
             <Button size="md">
               立即体验
               <ArrowRight className="h-4 w-4" />

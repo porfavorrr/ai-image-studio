@@ -8,8 +8,7 @@ import { PosterCanvas } from "@/components/poster/PosterCanvas";
 import { palettes, PosterSettings } from "@/components/poster/PosterSettings";
 import { PosterVariants } from "@/components/poster/PosterVariants";
 import { Card } from "@/components/ui/Card";
-import { apiClient, getImageErrorMessage } from "@/lib/api-client";
-import { posterMockResults } from "@/lib/mock-data";
+import { apiClient, getImageErrorMessage, isUnauthorizedError } from "@/lib/api-client";
 import { cn, sleep } from "@/lib/utils";
 import type { PosterImageResult, PosterRatio, PosterStyle, PosterUsage } from "@/types/image";
 
@@ -32,8 +31,8 @@ export function PosterStudio() {
   const [style, setStyle] = useState<PosterStyle>("clean");
   const [ratio, setRatio] = useState<PosterRatio>("3:4");
   const [paletteIndex, setPaletteIndex] = useState(0);
-  const [results, setResults] = useState<PosterImageResult[]>(posterMockResults);
-  const [activeResult, setActiveResult] = useState<PosterImageResult>(posterMockResults[0]);
+  const [results, setResults] = useState<PosterImageResult[]>([]);
+  const [activeResult, setActiveResult] = useState<PosterImageResult | null>(null);
   const [variantIndex, setVariantIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,6 +60,10 @@ export function PosterStudio() {
       setActiveResult(response.results[0]);
       setVariantIndex(0);
     } catch (requestError) {
+      if (isUnauthorizedError(requestError)) {
+        window.location.href = "/login?redirect=/poster";
+        return;
+      }
       setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
@@ -75,13 +78,19 @@ export function PosterStudio() {
           <h1 className="mt-2 text-3xl font-bold tracking-normal text-ink">输入标题与用途，快速生成可编辑封面</h1>
         </div>
         <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-line">
-          当前版式：{activeResult.title}
+          {activeResult ? `当前版式：${activeResult.title}` : "生成后可选择背景"}
         </div>
       </div>
 
       {error ? (
         <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
           {error}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="mb-6 rounded-lg border border-studio-200 bg-studio-50 px-4 py-3 text-sm font-semibold text-studio-700">
+          图片生成中，可能需要较长时间，请不要关闭页面。
         </div>
       ) : null}
 
@@ -122,7 +131,7 @@ export function PosterStudio() {
           ratio={ratio}
           palette={palettes[paletteIndex]}
           variantIndex={variantIndex}
-          backgroundImage={activeResult.url}
+          backgroundImage={activeResult?.url}
         />
 
         <div className="grid gap-6">
@@ -147,7 +156,7 @@ export function PosterStudio() {
       <div className="mt-6">
         <PosterVariants
           results={results}
-          activeId={activeResult.id}
+          activeId={activeResult?.id}
           loading={loading}
           onSelect={(result, index) => {
             setActiveResult(result);

@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { buildPosterPrompt } from "@/lib/server/image-prompt-builder";
-import { createId, getImageProvider, imageErrorResponse, shouldUseMockImageApi } from "@/lib/server/image-route-utils";
+import { imageErrorResponse } from "@/lib/server/image-route-utils";
 import { ImageRequestError } from "@/lib/server/image-validation";
-import { generateImage as generateImageWithCodex } from "@/lib/server/codex-image-api-service";
-import { generateImage as generateImageWithOpenAI } from "@/lib/server/openai-image-service";
-import { createPosterImages as createMockPosterImages } from "@/lib/services/image-service";
+import { runPosterTask } from "@/lib/server/image-task-service";
+import { getCurrentUser } from "@/lib/session";
 import type { ImageSize, PosterImageRequest, PosterRatio, PosterStyle, PosterUsage } from "@/types/image";
 
 export const runtime = "nodejs";
@@ -25,6 +23,9 @@ function sizeFromRatio(ratio: PosterRatio): ImageSize {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("UNAUTHORIZED");
+
     let body: Partial<PosterImageRequest>;
 
     try {
@@ -39,50 +40,17 @@ export async function POST(request: Request) {
     const style = normalize(body.style, styles, "clean");
     const ratio = normalize(body.ratio, ratios, "3:4");
 
-    if (shouldUseMockImageApi()) {
-      const data = await createMockPosterImages({
-        title,
-        subtitle,
-        usage,
-        style,
-        ratio
-      });
-      return NextResponse.json(data);
-    }
-
-    const prompt = buildPosterPrompt({
+    const data = await runPosterTask({
+      userId: user.id,
       title,
       subtitle,
       usage,
       style,
-      ratio
+      ratio,
+      size: sizeFromRatio(ratio)
     });
-    const provider = getImageProvider();
-    const result =
-      provider === "codex"
-        ? await generateImageWithCodex({
-            prompt
-          })
-        : await generateImageWithOpenAI({
-            prompt,
-            size: sizeFromRatio(ratio),
-            quality: "auto",
-            outputFormat: "png"
-          });
 
-    return NextResponse.json({
-      taskId: createId("poster-task"),
-      status: "succeeded",
-      mode: "real",
-      provider,
-      results: [
-        {
-          id: "poster-result-1",
-          url: result.url,
-          title: "AI 海报背景"
-        }
-      ]
-    });
+    return NextResponse.json(data);
   } catch (error) {
     return imageErrorResponse(error);
   }

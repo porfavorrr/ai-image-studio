@@ -3,7 +3,7 @@
 import { Expand, Eraser, Image, Send, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { toolLabels, toolPrompts } from "@/lib/mock-data";
+import { toolLabels, toolPrompts } from "@/lib/studio-content";
 import { cn } from "@/lib/utils";
 import type { EditTool } from "@/types/image";
 
@@ -85,7 +85,7 @@ export function PromptPanel({
       </Button>
 
       <p className="mt-4 text-xs leading-5 text-muted">
-        真实模式会在服务端调用图像模型；未配置 API Key 时返回 mock 结果。
+        生成任务会在服务端处理，完成后自动保存到历史记录。
       </p>
     </Card>
   );

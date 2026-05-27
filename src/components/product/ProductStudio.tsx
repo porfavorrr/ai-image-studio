@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { UploadDropzone } from "@/components/ui/UploadDropzone";
-import { apiClient, getImageErrorMessage } from "@/lib/api-client";
-import { industryTemplates, mockImages, productMockResults } from "@/lib/mock-data";
+import { apiClient, getImageErrorMessage, isUnauthorizedError } from "@/lib/api-client";
+import { industryTemplates } from "@/lib/studio-content";
 import { sleep } from "@/lib/utils";
 import { useStudioStore } from "@/lib/studio-store";
 import type {
@@ -49,18 +49,23 @@ export function ProductStudio() {
   const [style, setStyle] = useState<ProductStyle>("premium");
   const [sellingPoints, setSellingPoints] = useState("轻盈质感、细腻光泽、适合日常通勤使用");
   const [ratio, setRatio] = useState<ProductRatio>("1:1");
-  const [results, setResults] = useState<ProductImageResult[]>(productMockResults);
+  const [results, setResults] = useState<ProductImageResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleGenerate = async () => {
+    if (!imageFile) {
+      setError("请先上传商品图片");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
       const [response] = await Promise.all([
         apiClient.createProductImages({
-          image: imageFile ?? undefined,
-          imageUrl: imageUrl ?? mockImages.product1,
+          image: imageFile,
+          imageUrl: imageUrl ?? undefined,
           template,
           scene,
           style,
@@ -76,6 +81,10 @@ export function ProductStudio() {
 
       setResults(response.results);
     } catch (requestError) {
+      if (isUnauthorizedError(requestError)) {
+        router.push("/login?redirect=/product");
+        return;
+      }
       setError(getImageErrorMessage(requestError));
     } finally {
       setLoading(false);
@@ -105,6 +114,12 @@ export function ProductStudio() {
         </div>
       ) : null}
 
+      {loading ? (
+        <div className="mb-6 rounded-lg border border-studio-200 bg-studio-50 px-4 py-3 text-sm font-semibold text-studio-700">
+          图片生成中，可能需要较长时间，请不要关闭页面。
+        </div>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-3">
@@ -117,7 +132,7 @@ export function ProductStudio() {
             </div>
           </div>
           <UploadDropzone
-            value={imageUrl ?? mockImages.product1}
+            value={imageUrl}
             compact
             title="上传商品图"
             subtitle="建议使用主体清晰、背景简洁的产品照片"
@@ -137,7 +152,13 @@ export function ProductStudio() {
           <ProductTemplateSelector value={template} onChange={setTemplate} />
 
           <div className="mt-6 overflow-hidden rounded-lg border border-line bg-slate-50">
-            <SmartImage src={mockImages.product2} alt="商品场景预览" className="h-[250px] w-full rounded-none border-0" />
+            {imageUrl ? (
+              <SmartImage src={imageUrl} alt="商品图预览" className="h-[250px] w-full rounded-none border-0" />
+            ) : (
+              <div className="flex h-[250px] items-center justify-center px-6 text-center text-sm font-semibold text-slate-500">
+                上传商品图后，将在这里预览当前素材
+              </div>
+            )}
           </div>
         </Card>
 

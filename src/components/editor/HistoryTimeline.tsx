@@ -23,6 +23,11 @@ export function HistoryTimeline({ items }: HistoryTimelineProps) {
       </div>
 
       <div className="scrollbar-soft flex gap-4 overflow-x-auto pb-2">
+        {items.length === 0 ? (
+          <div className="min-w-full rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-semibold text-muted">
+            本次编辑记录会在生成后显示。完整历史记录可在个人账户中查看。
+          </div>
+        ) : null}
         {items.map((item, index) => (
           <div key={item.id} className="min-w-[190px] rounded-lg border border-line bg-slate-50 p-3">
             <div className="relative h-24 overflow-hidden rounded-lg bg-white">

@@ -1,4 +1,4 @@
-import { templates } from "@/lib/mock-data";
+import { templates } from "@/lib/studio-content";
 
 export async function listTemplates() {
   return templates;

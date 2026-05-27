@@ -1,6 +1,7 @@
 export type EditTool = "background" | "remove" | "enhance" | "style" | "expand" | "custom";
 export type ImagePromptTool = EditTool | "product" | "poster";
 export type ImageApiMode = "real" | "mock";
+export type ImageProvider = "mock" | "codex" | "openai";
 export type ImageQuality = "low" | "medium" | "high" | "auto";
 export type ImageOutputFormat = "png" | "jpeg" | "webp";
 export type ImageSize = "1024x1024" | "1024x1536" | "1536x1024" | "auto";
@@ -42,6 +43,7 @@ export interface EditImageResponse {
   taskId: string;
   status: "succeeded";
   mode: ImageApiMode;
+  provider?: ImageProvider;
   results: EditImageResult[];
   historyItem: HistoryItem;
 }
@@ -67,6 +69,7 @@ export interface ProductImageResponse {
   taskId: string;
   status: "succeeded";
   mode: ImageApiMode;
+  provider?: ImageProvider;
   results: ProductImageResult[];
 }
 
@@ -88,6 +91,7 @@ export interface PosterImageResponse {
   taskId: string;
   status: "succeeded";
   mode: ImageApiMode;
+  provider?: ImageProvider;
   results: PosterImageResult[];
 }
 

@@ -32,6 +32,13 @@ export function ProductResultGrid({ results, loading, onEdit }: ProductResultGri
             <div key={item} className="h-[340px] animate-pulse rounded-lg bg-slate-100" />
           ))}
         </div>
+      ) : results.length === 0 ? (
+        <div className="flex min-h-[260px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
+          <div>
+            <p className="text-base font-semibold text-ink">生成后将在这里展示商品图</p>
+            <p className="mt-2 text-sm text-muted">上传商品图片并设置场景参数，即可获得可下载的生成结果。</p>
+          </div>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {results.map((result) => (

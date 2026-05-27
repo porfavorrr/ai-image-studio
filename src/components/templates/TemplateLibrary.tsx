@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { apiClient } from "@/lib/api-client";
-import { templates as fallbackTemplates } from "@/lib/mock-data";
+import { templates as fallbackTemplates } from "@/lib/studio-content";
 import { cn, formatUsageCount } from "@/lib/utils";
 import type { TemplateCategory, TemplateItem } from "@/types/template";
 

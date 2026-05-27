@@ -50,7 +50,7 @@ export function SmartImage({
         <div className="flex h-full min-h-[inherit] w-full flex-col items-center justify-center px-5 text-center text-slate-500">
           <ImageOff className="h-8 w-8 text-slate-400" />
           <p className="mt-3 text-sm font-semibold text-slate-600">{alt || "图片素材"}</p>
-          <p className="mt-1 text-xs text-slate-400">素材加载失败，可在 mock-images.ts 中替换</p>
+          <p className="mt-1 text-xs text-slate-400">图片加载失败，请稍后重试</p>
         </div>
       ) : (
         <img

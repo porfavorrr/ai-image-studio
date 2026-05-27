@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildEditPrompt, editToolLabels } from "@/lib/server/image-prompt-builder";
-import { createId, getImageProvider, imageErrorResponse, shouldUseMockImageApi } from "@/lib/server/image-route-utils";
+import { imageErrorResponse } from "@/lib/server/image-route-utils";
 import {
   getFormString,
   getRequiredImageFile,
@@ -9,14 +8,16 @@ import {
   normalizeImageSize,
   normalizeOutputFormat
 } from "@/lib/server/image-validation";
-import { editImage as editImageWithCodex } from "@/lib/server/codex-image-api-service";
-import { editImage as editImageWithOpenAI } from "@/lib/server/openai-image-service";
-import { editImage as createMockEditResponse } from "@/lib/services/image-service";
+import { runEditTask } from "@/lib/server/image-task-service";
+import { getCurrentUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("UNAUTHORIZED");
+
     const formData = await request.formData();
     const image = getRequiredImageFile(formData);
     const prompt = getFormString(formData, "prompt");
@@ -25,54 +26,17 @@ export async function POST(request: Request) {
     const quality = normalizeImageQuality(getFormString(formData, "quality", "auto"));
     const outputFormat = normalizeOutputFormat(getFormString(formData, "outputFormat", "png"));
 
-    if (shouldUseMockImageApi()) {
-      const data = await createMockEditResponse({
-        image,
-        prompt,
-        tool,
-        size,
-        quality,
-        outputFormat
-      });
-      return NextResponse.json(data);
-    }
-
-    const finalPrompt = buildEditPrompt(tool, prompt);
-    const provider = getImageProvider();
-    const result =
-      provider === "codex"
-        ? await editImageWithCodex({
-            image,
-            prompt: finalPrompt
-          })
-        : await editImageWithOpenAI({
-            image,
-            prompt: finalPrompt,
-            size,
-            quality,
-            outputFormat
-          });
-
-    const resultItem = {
-      id: "result-1",
-      url: result.url,
-      type: "edited" as const,
-      label: "效果图 1"
-    };
-
-    return NextResponse.json({
-      taskId: createId("image-task"),
-      status: "succeeded",
-      mode: "real",
-      provider,
-      results: [resultItem],
-      historyItem: {
-        id: createId("history"),
-        title: editToolLabels[tool],
-        createdAt: new Date().toISOString(),
-        thumbnail: result.url
-      }
+    const data = await runEditTask({
+      userId: user.id,
+      image,
+      prompt,
+      tool,
+      size,
+      quality,
+      outputFormat
     });
+
+    return NextResponse.json(data);
   } catch (error) {
     return imageErrorResponse(error);
   }

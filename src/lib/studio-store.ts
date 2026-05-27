@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import type { EditImageResult, EditTool, HistoryItem } from "@/types/image";
-import { mockImages } from "@/lib/mock-data";
 
 interface StudioState {
   uploadedImage: string | null;
@@ -32,14 +31,7 @@ export const useStudioStore = create<StudioState>((set) => ({
   selectedTool: "custom",
   editResults: [],
   selectedResult: null,
-  history: [
-    {
-      id: "history-initial",
-      title: "示例原图",
-      createdAt: new Date().toISOString(),
-      thumbnail: mockImages.original
-    }
-  ],
+  history: [],
   setUploadedImage: (imageUrl, file = null) =>
     set(() => ({
       uploadedImage: imageUrl,
